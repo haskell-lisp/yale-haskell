@@ -1,0 +1,70 @@
+(to nth :index :lst
+  (if (equal :index 1)
+     then (first :lst)
+     else (nth (difference :index 1) (butfirst :lst))))
+
+(to makelist :begin :end
+  (fput :begin (if (equal :begin :end)
+                   then [[]]
+                   else (makelist (sum :begin 1) :end))))
+
+(to wheel :centerright
+  [(hideturtle)
+   (pendown)
+   (setangle 90)
+   (setxy :centerright 350)
+   (repeat 72 times
+     [(forward 2)
+      (left 5)])])
+
+(to car 
+  [(pendown)
+   (hideturtle)
+   (setxy 400 350)
+   (setangle 90)
+   (forward 70)
+   (left 90)
+   (forward 100)
+   (right 60)
+   (forward 80)
+   (left 60)
+   (forward 100)
+   (left 60)
+   (forward 80)
+   (right 60)
+   (forward 70)
+   (left 90)
+   (forward 70)
+   (left 90)
+   (forward 350)
+   (wheel 350)
+   (wheel 150)])
+
+(to docar?
+  [(local "ans)
+   (print [do you want a car?])
+   (make "ans (read))
+   (if (equal (first ans) "yes)
+      then (car)
+      else [[oh well]])])
+
+(to poly :size :angles
+    [(hideturtle)
+     (pendown)
+     (setangle 90)
+     (repeat :angles times
+             [(forward :size)
+              (right (div 360 :angles))])])
+
+(make "x (makelist 3 12))
+
+(while (less (first x) 12)
+ [(make "x (butfirst x))
+  (print x)])
+
+(clean)
+
+(car)
+
+(poly 100 5)
+

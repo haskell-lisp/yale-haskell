@@ -1,0 +1,66 @@
+gobang       Weiming Wu & Niping Wu
+
+
+Introduction
+
+Our final project is to design and implement a Gobang game under
+X-Window3.2 environment, using the Haskell programming language. Users
+can play the game human-vs-human.  The program also provides a robot
+player with whom the user can play the game with.  We wrote altogether
+ten modules which were saved in different files to control the whole
+game.
+
+
+About Gobang
+
+The checkerboard of Gobang consists of 19 vertical lines and 19
+horizontal lines.  Two players in turn place a unit on the
+checkerboard.  Each unit should be put on an unoccupied intersection
+of a vertical and a horizontal line.  The winner is the player who
+first makes five consecutive units on either vertical, horizontal or
+diagonal direction.
+
+The program is able to perform the following tasks: 1) Use a new
+window under X-Window interface to display the checkerboard.  Players
+will use a mouse to place units onto the chessboard, where a unit is a
+circle with the color black or white.  2) Prompt for the names of both
+players and display them.  3) Calculate the time both players have
+used up.  4) Supervise the progress of the game, declare winner and
+end the game once one player wins.  5) At each point of the game,
+store the progress of the game, so players can review each step during
+the game.  6) There are five buttons on the screen which would provide
+some special services such as starting a new game, quitting the game,
+saving the game, importing the saved game, or reviewing the game as
+soon as the user selects the corresponding buttons.  7) Provide a
+moderately well robot player for that game (using minimum-maximum
+algorithm).
+
+
+Running Gobang
+
+A window titled "gobang" will appear on the screen.  On it is a
+checkerboard, clocks and buttons.  There will be an instruction saying
+"Please enter the name of player-1".  The user can do two things:
+either enter the name of a player or choose the "import" button. Once
+the "import" button is selected, an unfinished game, which was saved
+in the file "###go.bhs###" will be imported.  Please notice that the
+character "@" is reserved for the robot player, so if the user types
+in @ as the name of the first player, it is assumed that player-1 is
+the robot player.  Then the name of player 2 is prompted.  The game
+starts and at each turn an instruction like "Please enter your play."
+would appear on the screen.  The user should put a unit onto the
+checkerboard.  If the button is clicked on a wrong place or a unit is
+put onto an occupied position, an error message saying "Wrong Point.
+Please reenter." will appear on the screen and the user should reenter
+his play.  The marker next to the name of a player indicates whose
+turn it is.  At any point of the game the user can choose the other
+four buttons.  If the "new" button is selected, the present game will
+be terminated and a new blank checkerboard will be displayed on the
+screen; if the "review" button is selected, one step of the previous
+plays will be displayed each time after the user hits any key; if the
+"save" button is selected, the steps so far will be saved into the
+file "###go.bhs###"; if the "quit" button is selected, the game will
+be terminated.
+
+
+

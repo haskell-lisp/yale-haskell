@@ -1,0 +1,19 @@
+This directory contains print routines for the structures defined in
+the ast/ directory.
+
+The global *print-structure* controls printing of objects in the
+structure system.  Values are:
+  haskell  -- Prints haskell format expressions from ast
+  struct   -- Prints the raw structs (with circularity check)
+  top      -- Prints top level only of the struct
+
+The file defs.scm has the basic hooks to the printer mechanism.  The
+idea is that when *print-structure* is 'haskell, the print function stored
+in the type descriptor will get used.  If there isn't a print function,
+or if *print-structure* is false, then the thing will print out in
+some generic way that's good for debugging purposes.
+
+The macro define-printer is used to associate a print function with a
+structure type.  Since these can be defined on the fly, the print
+dispatching routine has to look up the inheritance chain of type
+descriptors looking for the first inherited type that has a printer.

@@ -1,0 +1,33 @@
+Commands used by the Y2.0 command interface:
+
+Commands to dispose of the current extension:
+:eval         Evaluate dialogues in the current extension
+:save         Save the current extension
+:kill         Forget about the current extension
+:list         Print the current extension
+
+Commands to load & run files (compilation units)
+:load file    Load a file into the system
+:compile file Compile a file to native code and save the binary
+:run file     Load a file and run `main'
+
+Commands to control the current module:
+:clear        Remove all saved definitions in the current module
+:module name  Set the current module
+:Main         Switch to an empty module named Main
+
+Other commands:
+:cd directory Set the current directory
+:p?           Describe available printers
+:p= p1 p2 ... Set the printers
+:p+ p1 p2 ... Enable selected printers
+:p- p1 p2 ... Disable selected printers
+:o?           Describe available optimizers
+:o= o1 o2 ... Set the optimizers
+:o+ o1 o2 ... Enable selected optimizers
+:o- o1 o2 ... Disable selected optimizers
+:(fn ...)     Evaluate a Lisp expression
+
+Abbreviations within the current extension:
+=exp          Creates a dialogue to print the expression under :e
+@exp          Creates a definition which will run the dialogue under :e

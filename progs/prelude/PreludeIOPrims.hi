@@ -1,0 +1,55 @@
+-- These lisp functions implement the standard Haskell requests
+
+interface PreludeBltinIO where
+
+import PreludeCore(String,Bin)
+import PreludeIO(SystemState,IOResult,IO)
+data IOResponse a = Succ a | Fail String
+
+{-# Prelude #-}
+
+primReadStringFile :: String -> IO (IOResponse String)
+primWriteStringFile :: String -> String -> IO (IOResponse ())
+primAppendStringFile :: String -> String -> IO (IOResponse ())
+primReadBinFile :: String -> IO (IOResponse Bin)
+primWriteBinFile :: String -> Bin -> IO (IOResponse ())
+primAppendBinFile :: String -> Bin -> IO (IOResponse ())
+primDeleteFile :: String -> IO (IOResponse ())
+primStatusFile :: String -> IO (IOResponse String)
+primReadStdin :: IO String
+primWriteStdout :: String -> IO (IOResponse ())
+primReadBinStdin :: IO (IOResponse Bin)
+primWriteBinStdout :: Bin -> IO (IOResponse ())
+primGetEnv :: String -> IO (IOResponse String)
+
+{-#
+primReadStringFile ::   LispName("prim.read-string-file")
+primWriteStringFile ::  LispName("prim.write-string-file"), NoConversion
+primAppendStringFile :: LispName("prim.append-string-file"), NoConversion
+primReadBinFile ::      LispName("prim.read-bin-file")
+primWriteBinFile ::     LispName("prim.write-bin-file")
+primAppendBinFile ::    LispName("prim.append-bin-file")
+primDeleteFile ::       LispName("prim.delete-file")
+primStatusFile ::       LispName("prim.status-file")
+primReadStdin ::        LispName("prim.read-string-stdin"), NoConversion
+primWriteStdout ::      LispName("prim.write-string-stdout"), NoConversion
+primReadBinStdin ::     LispName("prim.read-bin-stdin")
+primWriteBinStdout ::   LispName("prim.write-bin-stdout")
+primGetEnv ::           LispName("prim.getenv")
+#-}
+
+--   Monad prims
+
+returnIO :: a -> IO a
+getState :: IOResult a -> SystemState
+getRes :: IOResult a -> a
+
+{-#
+returnIO :: LispName("prim.returnio"), 
+            Strictness("N,S"), NoConversion, Complexity(3)
+getState :: LispName("prim.getstate"), 
+            Strictness("S"), NoConversion, Complexity(3)
+getRes :: LispName("prim.getres"), 
+          Strictness("S"), NoConversion
+#-}
+

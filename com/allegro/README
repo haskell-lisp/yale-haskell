@@ -1,0 +1,40 @@
+This directory contains command scripts used for building Yale Haskell
+from the source distribution under Franz Allegro Common Lisp.  We've
+been using version 4.1 on both NeXT and Sparc platforms -- don't
+expect our code to work without modifications under earlier versions.
+
+Be sure you load the Allegro patches -- the scripts do this
+automatically.  If you're trying to build on some other kind of
+platform, you'll have to get the equivalent patches from Franz Inc.
+Our code won't work without these bug fixes.
+
+Developers need to source haskell-development instead of haskell-setup
+in the .cshrc file.
+
+To rebuild the system:
+
+* You need to define environment variables Y2 and ALLEGRO to point to the
+  appropriate pathnames.  See the haskell-development script for details.
+
+* Make sure that the environment variable PRELUDEBIN (in the 
+  haskell-setup script) points to $PRELUDE/allegro (or $PRELUDE/allegro-next,
+  as appropriate).
+
+* Execute the "compile" script.  This will recompile all of the Lisp 
+  source files that make up the Yale Haskell system.  Compiled files are
+  put in the "allegro" or "allegro-next" subdirectory of each source directory.
+
+* Execute the "build-prelude" script to compile the standard prelude.  
+  Note that this process tends to use up a huge amount of memory!
+
+* Execute the "savesys" script to build a new executable.
+
+* The new executable is initially called "bin/new-allegro-haskell".  Try
+  it out.  If it works, you should rename it to "bin/allegro-haskell".
+  Make sure that HASKELLPROG (in the haskell-setup script) is correct.
+
+* If you want to build an executable with the X support, you'll also
+  need to run the "build-xlib" and "savesys-xlib" scripts.  You may
+  need to edit these scripts to change the pathname of the file 
+  containing the CLX library (or suppress the load entirely if you
+  are using a Lisp executable with CLX pre-loaded.).

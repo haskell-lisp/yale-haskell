@@ -1,0 +1,14 @@
+#!/bin/csh
+#
+# clean -- delete binaries
+#
+
+$Y2/com/lucid/clean
+$Y2/com/cmu/clean
+$Y2/com/allegro/clean
+$Y2/com/lispworks/clean
+$Y2/com/akcl/clean
+
+# T stuff
+'rm' $Y2/*/t/*.{si,sd,sn,so}
+'rm' $Y2/support/t-support/*.{si,sd,sn,so}

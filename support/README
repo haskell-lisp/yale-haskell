@@ -1,0 +1,4 @@
+This directory contains utilities that are layered on top of the basic
+mumble support stuff.  There should be no T-specific or CL-specific
+code in this area.
+

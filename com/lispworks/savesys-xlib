@@ -1,0 +1,52 @@
+#!/bin/csh
+#
+# savesys -- build a saved executable in bin/new-lispworks-haskell
+#
+#
+cd $Y2
+setenv PRELUDEBIN $Y2/progs/prelude/lispworks
+if !(-e $PRELUDEBIN/Prelude.wfasl) then
+  echo "Build the prelude first, stupid..."
+  exit
+  endif
+setenv LIBRARYBIN $Y2/progs/lib/X11/lispworks
+if !(-e $LIBRARYBIN/xlib.wfasl) then
+  echo "Build the xlib stuff first, silly..."
+  exit
+  endif
+$LISPWORKS <<EOF
+;;; Load the Haskell system.
+(load "com/lispworks/patches/safe-fo-closure.wfasl")
+(make-package "MUMBLE-IMPLEMENTATION" :use '("LISP"))
+(load "cl-support/cl-init")
+;;; Set various internal switches to appropriate values for running
+;;; Haskell code.
+(proclaim '(optimize (speed 3) (safety 0) (compilation-speed 0)))
+(setf *load-verbose* nil)
+(setf *compile-verbose* nil)
+(in-package :mumble-user)
+(setf *printers* '(compiling loading))
+(setf *optimizers* '())
+(setf *compile-interface* '#f)
+;;; Load the prelude.
+(compile/load *prelude-unit-filename*)
+;;; Load the X support.
+(compile/load "\$HASKELL_LIBRARY/X11/xlib")
+(setf *haskell-compiler-update* 
+	(string-append *haskell-compiler-update* "-X11"))
+;;; Set up the saved system.
+(define (haskell-toplevel)
+  ;; Need to reset pathname defaults
+  (setf lisp:*default-pathname-defaults* (lisp:truename ""))
+  (load-init-files)
+  (do () ('#f)
+    (lisp:with-simple-restart (restart-haskell "Restart Haskell.")
+      (heval))))
+(define (restart-haskell)
+  (lisp:invoke-restart 'restart-haskell))
+(lw:save-image "bin/new-lispworks-clx-haskell"
+  :gc '#t
+  :normal-gc '#f  ; don't reset gc parameters
+  :restart-function 'haskell-toplevel)
+(lw:bye)
+EOF

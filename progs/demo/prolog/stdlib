@@ -1,0 +1,38 @@
+This file contains a list of predicate definitions that will automatically
+be read into Mini Prolog at the beginning of a session.  Each clause in this
+file must be entered on a single line and lines containing syntax errors are
+always ignored.  This includes the first few lines of this file and provides
+a simple way to include comments.
+
+append(nil,X,X).
+append(cons(X,Y),Z,cons(X,W)):-append(Y,Z,W).
+
+equals(X,X).
+
+not(X):-X,!,false.
+not(X).
+
+or(X,Y):-X.
+or(X,Y):-Y.
+
+and(X,Y):-X,Y.
+
+reverse(nil,nil).
+reverse(cons(A,X),Y):-and(reverse(X,Z),append(Z,cons(A,nil),Y)).
+
+palindromes(X):-and(reverse(X,Y),equals(X,Y)).
+
+mul2(A,B):-append(A,A,B).
+mul4(A,B):-and(mul2(A,C),mul2(C,B)).
+mul8(A,B):-and(mul4(A,C),mul2(C,B)).
+mul16(A,B):-and(mul8(A,C),mul2(C,B)).
+mul32(A,B):-and(mul16(A,C),mul2(C,B)).
+mul64(A,B):-and(mul32(A,C),mul2(C,B)).
+mul128(A,B):-and(mul64(A,C),mul2(C,B)).
+mul256(A,B):-and(mul128(A,C),mul2(C,B)).
+mul512(A,B):-and(mul256(A,C),mul2(C,B)).
+mul1024(A,B):-and(mul512(A,C),mul2(C,B)).
+
+true.
+
+End of stdlib

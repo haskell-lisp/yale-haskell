@@ -1,0 +1,97 @@
+These libraries are adapted from the lml library.  Also included are a number
+of Common Lisp functions.
+
+The hbc library contains the following modules and functions:
+
+* module Either
+    binary sum data type
+	data Either a b = Left a | Right b
+    constructor Left typically used for errors
+
+* module Option
+    type for success or failure
+	data Option a = None | Some a
+	thenO :: Option a -> (a -> Option b) -> Option b	apply a function that may fail
+
+
+* module ListUtil
+    Various useful functions involving lists that are missing from the Prelude
+	assoc :: (Eq c) => (a -> b) -> b -> [(c, a)] -> c -> b
+		assoc f d l k looks for k in the association list l, if it is found f is applied to the value, otherwise d is returned
+	concatMap :: (a -> [b]) -> [a] -> [b]
+		flattening map (LMLs concmap)
+	unfoldr :: (a -> (b, a)) -> (a -> Bool) -> a -> [b]
+		unfoldr f p x repeatedly applies f to x until (p x) holds. (f x) should give a list element and a new x
+	mapAccuml :: (a -> b -> (a, c)) -> a -> [b] -> (a, [c])
+		mapAccuml f s l  maps f over l, but also threads the state s though (LMLs mapstate)
+	union :: (Eq a) => [a] -> [a] -> [a]
+		unions of two lists
+	intersection :: (Eq a) => [a] -> [a] -> [a]
+		intersection of two lists
+	chopList :: ([a] -> (b, [a])) -> [a] -> [b]
+		LMLs choplist
+	assocDef :: (Eq a) => [(a, b)] -> b -> a -> b
+		LMLs assocdef
+	lookup :: (Eq a) => [(a, b)] -> a -> Option b
+		lookup l k looks for the key k in the association list l and returns an optional value
+
+* module Pretty
+    John Hughes pretty printing library.	
+	type Context = (Bool, Int, Int, Int)
+	type IText = Context -> [String]
+	text :: String -> IText				just text
+	(~.) :: IText -> IText -> IText			horizontal composition
+	(^.) :: IText -> IText -> IText			vertical composition
+	separate :: [IText] -> IText			separate by spaces
+	nest :: Int -> IText -> IText			indent
+	pretty :: Int -> Int -> IText -> String		format it
+
+* module QSort
+    Sort function using quicksort.
+	sortLe :: (a -> a -> Bool) -> [a] -> [a]	sort le l  sorts l with le as less than predicate
+	sort :: (Ord a) => [a] -> [a]			sort l  sorts l using the Ord class
+
+* module Random
+    Random numbers.
+	randomInts :: Int -> Int -> [Int]		given two seeds gives a list of random Int
+	randomDoubles :: Int -> Int -> [Double]		given two seeds gives a list of random Double
+
+* module RunDialogue
+    Test run programs of type Dialogue.
+    Only a few Requests are implemented, unfortunately not ReadChannel.
+	run :: Dialogue -> String			just run the program, showing the output
+	runTrace :: Dialogue -> String			run the program, showing each Request and Response
+
+* module Miranda
+    Functions found in the Miranda(tm) library.
+
+* module Printf
+    C printf style formatting.  Handles same types as printf in C, but requires the arguments
+    to be tagged.  Useful for formatting of floating point values.
+	data UPrintf = UChar Char | UString String | UInt Int | UInteger Integer | UFloat Float | UDouble Double
+	printf :: String -> [UPrintf] -> String		convert arguments in the list according to the formatting string
+
+
+* module Time
+    Manipulate time values (a Double with seconds since 1970).
+	--               year mon  day  hour min  sec  dec-sec  weekday
+	data Time = Time Int  Int  Int  Int  Int  Int  Double  Int
+	dblToTime :: Double -> Time			convert a Double to a Time
+	timeToDbl :: Time -> Double			convert a Time to a Double
+	timeToString :: Time -> String			convert a Time to a readable String
+
+-----  To add:
+
+Bytes
+IO Library
+Word oprtations
+Time clock stuff
+Lisp stuff: symbols
+            hashtables
+            strings
+
+
+
+
+
+

@@ -1,0 +1,15 @@
+#!/bin/csh
+#
+# build-xlib -- recompile the xlib stuff
+#
+#
+cd $Y2
+setenv CLXFILE /net/nebula/homes/systems/hcompile/cmu/lib/subsystems/clx-library.sparcf
+setenv LIBRARYBIN $Y2/progs/lib/bin/cmu
+rm $LIBRARYBIN/xlib*.sparcf
+bin/cmu-haskell <<EOF
+:(setf ext:*bytes-consed-between-gcs* 8000000)
+:(load "\$CLXFILE")
+:(setf *code-quality* 3)
+:compile \$HASKELL_LIBRARY/X11/xlib
+EOF

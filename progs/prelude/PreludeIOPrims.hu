@@ -1,0 +1,4 @@
+:output $PRELUDEBIN/PreludeIOPrims
+:stable
+:prelude
+PreludeIOPrims.hi

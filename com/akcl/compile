@@ -1,0 +1,11 @@
+#!/bin/csh
+#
+# compile -- compile the Yale Haskell system from scratch.
+#
+#
+cd $Y2
+$AKCL <<EOF
+;; Default optimize settings for AKCL are (speed 3) (safety 0)
+(load "support/cl-support/cl-init.lisp")
+(bye)
+EOF

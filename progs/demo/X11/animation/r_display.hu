@@ -1,0 +1,6 @@
+:o= foldr inline constant
+r_constants.hu
+r_utility.hu
+r_ptypes.hu
+r_display.hs
+$HASKELL_LIBRARY/X11/xlib.hu

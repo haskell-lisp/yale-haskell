@@ -1,0 +1,64 @@
+
+      Announcing the release of Yale Haskell 2.0.5
+
+We are releasing the latest version of the Yale Haskell system,
+Y2.0.5, in source form.  This fixes a number of minor problems in the
+2.0.5a release (for Sparc only) and should be relatively bug free.
+
+Yale Haskell can be built from sources using CMU Common Lisp, Lucid
+Common Lisp, Allegro Common Lisp, or Harlequin LispWorks.  The system
+may also build on akcl but the performance is very poor.
+
+Compiled versions of the system are available for Sparc systems running
+SunOS 4.1.2 and Sparc 10's (sun4m) running 4.1.3.  Anyone building a system
+using CMU lisp on a different platform should let us know and we will
+add more executables to the ftp area.  Look at the README for further
+information.
+
+This release features an X window interface.  Using CLX, the full
+functionality of X windows has been made available at the Haskell
+level.  There is also a Haskell <-> Lisp interface similar to the C
+interface in the Glasgow system.
+
+
+Our system is available for anonymous ftp from the Yale Haskell ftp site:
+
+        Site     Host name              Raw IP address
+        Yale     nebula.cs.yale.edu     128.36.13.1
+
+All files are in the directory pub/haskell/yale.
+
+haskell-source-205.tar.gz   -- The full sources
+haskell-205-<machine+OS>.tar.gz
+Compiling from scratch will take an hour or two, depending on system
+resources.  The file $HASKELL/com/<your-lisp>/README will contain
+complete building instructions.
+
+To obtain Yale Haskell via ftp:
+
+  - Move to the directory where you intend to place Yale Haskell
+  - Ftp to nebula and login anonymously
+  - cd to pub/haskell/yale
+  - Get the tar file: get haskell-source-205.tar.gz (a .Z file is available
+    for those without gzip).
+  - Unzip the file: (your zip utility may have a different name)
+           gzip -d *.gz
+  - Untar the file: tar xf *.tar
+  - Consult the documentation for further instructions.  Either print
+    out the reference manual in doc/manual/haskell.dvi or look at
+    install.verb in the same directory.
+
+Send any comments or questions to haskell-request@cs.yale.edu
+
+
+New features in this release include:
+
+  * Much better optimization
+  * Monadic I/O
+  * A general Haskell to Lisp interface
+  * An X window interface
+  * Strictness annotations and strict data constructors
+  * Lots of bugs fixed
+  * Improvements to the tutorial and Emacs interface
+  * Ported to all major Lisp systems
+

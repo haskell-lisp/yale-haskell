@@ -1,0 +1,3 @@
+This directory contains Common-Lisp-syntax files to set up a more
+Scheme-like environment.  Load cl-init.lisp and it will suck in all
+the rest.

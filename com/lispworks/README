@@ -1,0 +1,43 @@
+This directory contains command scripts used for building Yale Haskell
+from the source distribution under Lispworks from Harlequin.  We have
+been using version 3.1.1 on a Sparc.
+
+Developers need to source haskell-development instead of haskell-setup
+in the .cshrc file.
+
+Important: Make sure you load the stuff in the patches directory
+before trying to build the system (the command files do this for you).
+If you're building on some platform other than a sparc, you'll have to
+get equivalent patches from Harlequin before proceeding.
+
+To rebuild the system:
+
+* You need to define environment variables Y2 and LISPWORKS to point to the
+  appropriate pathnames.  See the haskell-development script for details.
+
+* Make sure that the environment variable PRELUDEBIN (in the 
+  haskell-setup script) points to $PRELUDE/lispworks.
+
+* Execute the "compile" script.  This will recompile all of the Lisp 
+  source files that make up the Yale Haskell system.  Compiled files are
+  put in the "lispworks" subdirectory of each source directory.
+
+* Execute the "build-prelude" script to compile the standard prelude.  
+  Note that this process tends to use up a huge amount of memory!
+
+* Execute the "savesys" script to build a new executable.
+
+* The new executable is initially called "bin/new-lispworks-haskell".  Try
+  it out.  If it works, you should rename it to "bin/lispworks-haskell".
+  Make sure that HASKELLPROG (in the haskell-setup script) is correct.
+
+* If you want to build an executable with the X support, you'll also
+  need to run the "build-xlib" and "savesys-xlib" scripts.  You may
+  need to edit these scripts to load the CLX library explicitly if
+  you are using a Lisp executable that doesn't have CLX pre-loaded.
+
+When you compile things with the Lispworks compiler, you'll see a
+bunch of messages complaining about forward references to things that
+haven't yet been defined.  We haven't been able to figure out how to
+suppress these messages, so unless something else goes wrong you should
+just ignore them.

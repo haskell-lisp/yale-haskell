@@ -1,0 +1,840 @@
+Syntax
+------
+
+(quote x)
+
+(function name)
+  You must use this to reference a global function, as in CL.  (There
+  isn't a local function namespace.)
+
+(lambda lambda-list . body)
+  Equivalent to #'(lambda ...) in Common Lisp.
+  The lambda-list can be dotted, as in Scheme.  CL lambda-list keywords
+  are not supported.
+
+function call
+  Order of evaluation is unspecified, as in Scheme.
+  You have to use FUNCALL if the function is bound with let.
+
+(funcall function . args)
+  As in Common Lisp, but might be a macro.  (The function is guaranteed
+  to be a true function, not a symbol.)
+
+(apply procedure . args)
+  As in Common Lisp/Scheme.
+
+(map procedure . lists)
+  As in Scheme.  Equivalent to MAPCAR in CL.
+
+(for-each procedure . lists)
+  As in Scheme.  Equivalent to MAPC in CL.
+
+(every procedure . lists)
+(some procedure . lists)
+(notany procedure . lists)
+(notevery procedure . lists)
+  As in CL, but only work on lists.
+
+(procedure? object)
+  As in Scheme, but can return an arbitrary truth value instead of just #t.
+  Note that we never use symbols or quoted lambda expressions as functions.
+
+(if test then . maybe-else)
+(when test . body)
+(unless test . body)
+
+(cond . tests)
+  As in Scheme, but the = syntax isn't supported.  When no test is true, the
+  result is undefined.
+
+(case value . cases)
+  As in Scheme.
+  Stylistically, use this only when the case labels are symbols.
+
+(and . expressions)
+(or  . expressions)
+
+(not value)
+  As in Scheme but can return an arbitrary truth value instead of #t.
+
+(set! variable value)
+  As in Scheme; this doesn't return a useful value.  Use setf instead.
+
+(setf place value)
+  Similar to SETF in Common Lisp.  Returns value.
+  See define-setf below.  Places that are macro calls are expanded
+  if they don't have their own setter.
+  Here is a list of the built-in setters:
+    dynamic
+    car
+    cdr
+    list-ref
+    string-ref
+    vector-ref
+    table-entry
+
+(let    bindings . body)
+(let*   bindings . body)
+(letrec bindings . body)
+  Note that each binding clause must be a list of the form (var init);
+  you can't just supply var or (var) as in Common Lisp.  Also remember
+  that the order of evaluation for the init-forms is not specified for
+  let/letrec.
+  The Scheme named LET construct is not supported.
+
+(flet   bindings . body)
+(labels bindings . body)
+  As in Common Lisp.
+
+(dynamic-let bindings . body)
+(dynamic name)
+  As in Eulisp.  Dynamic-let is equivalent to bind in T, or LET in
+  Common Lisp with all of the variables declared special.  As a matter
+  of style, use dynamic to reference the value rather than just the name.
+
+(begin . body)
+  Like PROGN in Common Lisp.
+
+(block name . body)
+(return-from name result)
+  The intersection of the Eulisp and Common Lisp definitions.  The "name" 
+  may be bound as a lexical variable, but you should only refer to it
+  inside a return-from.
+  Don't depend on named functions (etc) establishing implicit blocks,
+  as they do in CL.
+
+(do bindings-and-steppers (end-test . results) . body)
+  As in Scheme.  It doesn't necessarily establish an implicit BLOCK 
+  as in CL so you can't RETURN from the loop.
+
+(dolist (variable init . maybe-result) . body)
+(dotimes (variable init . maybe-result) . body)
+  As in CL, except you can't RETURN from the loop.
+
+(values . values)
+(multiple-value-bind variables values-expression . body)
+  As in Common Lisp, except that the values-expression must explicitly
+  return multiple values.
+
+(let/cc variable . body)
+  As in EuLisp.  This is the same as catch in T.  The continuation
+  has dynamic extent within the body.
+  You call the continuation with an arbitrary number of arguments, which
+  are the multiple values to be returned.
+
+(unwind-protect protected-form . body)
+
+(declare ...)
+  Similar to Common Lisp declare.  Declarations are allowed only in the
+  standard places that Common Lisp permits (in particular, at the
+  beginning of binding forms).  For now, only the following declarations
+  are permitted:
+
+  (ignore . variables)
+  (ignorable . variables)
+  (type type-spec . variables)  -- see info on type-specs below.
+
+
+
+
+Definitions
+-----------
+
+(define pattern . value)
+  As in Scheme.
+
+(define-integrable pattern . value)
+  Like DEFINE, but also tells the compiler to try to inline the value.
+
+(define-syntax (name . lambda-list) . body)
+  Similar to the equivalent T functionality.  The lambda-list does not
+  support destructuring, as does Common Lisp's DEFMACRO.
+  The macro definition is made both when the file is loaded and when it
+  is compiled.
+
+(define-local-syntax (name . lambda-list) . body)
+  Again, similar to the T functionality.  In Common Lisp, equivalent to
+  a DEFMACRO wrapped in (eval-when (compile) ...).  
+
+(define-setf getter-name setter-name)
+  Similar to the short form of DEFSETF in Common Lisp, except that the
+  calling convention for the setter differs:  the value is passed as the
+  first argument rather than as the last.  The setter must return this
+  value.
+
+(predefine pattern)
+  This is a forward definition for a function or variable.  It doesn't
+  actually make a definition; its purpose is to try to get rid of compiler
+  warnings about calls to functions that haven't been defined yet.  It can
+  be a no-op if the underlying Lisp system doesn't provide any way to do
+  this.
+
+(redefine pattern . value)
+  Like DEFINE, but hints to the compiler not to complain if this 
+  function/variable was previously defined somewhere else.
+
+(redefine-syntax (name . lambda-list) . body)
+  Like DEFINE-SYNTAX, but hints to the compiler not to complain if this
+  macro was previously defined somewhere else.
+
+
+Equivalence
+-----------
+
+(eq? x1 x2)
+(eqv? x1 x2)
+(equal? x1 x2)
+  As in Scheme but can return an arbitrary truth value instead of #t.
+  Note that equal? is not the same as EQUAL in CL because it descends vectors.
+  eqv? is different from the T equiv? because it doesn't descent strings.
+
+
+Lists
+-----
+
+(pair? x)
+  As in Scheme but can return an arbitrary truth value instead of #t.
+
+(cons x y)
+(list . values)
+(make-list length . maybe-init)
+
+(cxxxxr x)
+
+(null? x)
+(list? x)
+  As in Scheme but can return an arbitrary truth value instead of #t.
+  Note that this is a check for a proper (null-terminated) list, not
+  like LISTP in CL.
+
+(length x)
+(append list . more-lists)
+(nconc list . more-lists)
+
+(reverse x)
+(nreverse x)
+
+(list-tail list n)
+  Like NTHCDR in Common Lisp.
+
+(list-ref list n)
+  Like NTH in Common Lisp.
+
+(last list)
+(butlast list)
+  As in Common Lisp.
+
+(memq object list)
+(memv object list)
+(member object list)
+
+(assq object list)
+(assv object list)
+(assoc object list)
+
+(push item place)
+(pop place)
+  As in Common Lisp.
+
+(list-copy list)
+
+
+Symbols
+-------
+
+(symbol? object)
+(symbol->string object)
+(string->symbol object)
+(gensym . maybe-prefix)
+(gensym? object)
+
+(symbol-append . symbols)
+
+
+Characters
+----------
+
+(char? object)
+  As in Scheme, but can return an arbitrary truth value instead of just #t.  
+
+(char=? c1 c2)
+(char<? c1 c2)
+(char>? c1 c2)
+(char<=? c1 c2)
+(char>=? c1 c2)
+  As in Scheme, except that they can return an arbitrary truth value
+  instead of just #t.
+
+(char-ci=? c1 c2)
+(char-ci<? c1 c2)
+(char-ci>? c1 c2)
+(char-ci<=? c1 c2)
+(char-ci>=? c1 c2)
+  As in Scheme, except that they can return an arbitrary truth value
+  instead of just #t.
+
+(char-alphabetic? c)
+(char-numeric? c)
+(char-whitespace? c)
+(char-upper-case? c)
+(char-lower-case? c)
+
+(char->integer c)
+(integer->char n)
+
+(char-upcase c)
+(char-downcase c)
+
+(char-name c)
+  As in Common Lisp.
+
+(char->digit c . maybe-radix)
+  Returns nil or the "weight" of the character as a fixnum in the given
+  radix (defaults to 10).
+
+
+Strings
+-------
+
+(string? object)
+  As in Scheme, but can return an arbitrary truth value instead of just #t.
+
+(make-string length . maybe-init)
+
+(string char . more-chars)
+
+(string-length string)
+(string-ref string index)
+
+(string=? s1 s2)
+(string<? s1 s2)
+(string>? s1 s2)
+(string<=? s1 s2)
+(string>=? s1 s2)
+  As in Scheme, but can return an arbitrary truth value instead of just #t.
+
+(string-ci=? s1 s2)
+(string-ci<? s1 s2)
+(string-ci>? s1 s2)
+(string-ci<=? s1 s2)
+(string-ci>=? s1 s2)
+  As in Scheme, but can return an arbitrary truth value instead of just #t.
+
+(substring string start end)
+(string-append string . more-strings)
+
+(string->list string)
+(list->string list)
+
+(string-copy string)
+
+(string-upcase string)
+(string-downcase string)
+
+
+Vectors
+-------
+
+(vector? object)
+  As in Scheme, but can return an arbitrary truth value instead of just #t.
+
+(make-vector length . maybe-init)
+(vector object . more-objects)
+
+(vector-length vector)
+(vector-ref vector index)
+(vector->list vector)
+(list->vector list)
+
+(vector-copy vector)
+
+
+Numbers
+-------
+
+(number? object)
+  As in Scheme, but can return an arbitrary truth value instead of just #t.
+
+(integer? object)
+(rational? object)
+(float? object)
+  These test the representation of a number, not its mathematical 
+  properties.  They're equivalent to the CL integerp, rationalp, and floatp
+  predicates.  We ignore complex numbers for now.
+
+(exact->inexact number)
+  Convert an exact-rational to a float.
+
+(= x1 x2)
+(< x1 x2)
+(> x1 x2)
+(<= x1 x2)
+(>= x1 x2)
+  As in Scheme, except they can return an arbitrary truth value.
+  They're restricted to being binary operators because that's all
+  that's supported in T.
+
+(zero? x)
+(positive? x)
+(negative? x)
+  As in Scheme, except they can return an arbitrary truth value.
+
+(min number . more-numbers)
+(max number . more-numbers)
+
+(+ . numbers)
+(* . numbers)
+(- n1 . more-numbers)
+(/ n1 . more-numbers)
+  As in Scheme.
+
+(quotient n1 n2)
+(remainder n1 n2)
+(modulo n1 n2)
+  quotient rounds towards zero.
+  remainder has the sign of the second argument, modulo has the sign of
+  the first argument.
+
+(floor x)
+(ceiling x)
+(truncate x)
+(round x)
+  As in Scheme.  These return a number of the same type as the argument.
+
+(floor->exact x)
+(ceiling->exact x)
+(truncate->exact x)
+(round->exact x)
+  Like the above, but return an exact-integer result.  Borrowed from
+  MIT Scheme.
+
+(1+ n)
+(1- n)
+(incf place . maybe-delta)
+(decf place . maybe-delta)
+  As in Common Lisp.
+
+(number->string number . maybe-radix)
+(string->number string . maybe-radix)
+  As in Scheme.
+
+(expt base power)
+  As in Common Lisp.  [our only use is when both args are integers]
+
+
+Tables
+------
+
+(table? object)
+(make-table)
+(table-entry table key)
+(table-for-each proc table)
+(copy-table table)
+  More or less as in T.  For now we only bother with tables that use
+  eq? as the comparison function -- mostly symbols are used as keys.
+ 
+
+I/O
+---
+
+(call-with-input-file string proc)
+(call-with-output-file string proc)
+  As in Scheme.  The proc is called with one argument, the port.
+
+(call-with-input-string string proc)
+(call-with-output-string proc)
+  Similar, but for reading/writing to a string stream string.
+  Call-with-output-string returns the string.
+
+(input-port? object)
+(output-port? object)
+  As in Scheme, but can return an arbitrary truth value.
+
+(current-input-port)
+(current-output-port)
+
+(open-input-file filename)
+(open-output-file filename)
+
+(close-input-port port)
+(close-output-port port)
+
+(read . maybe-port)
+(read-char . maybe-port)
+(peek-char . maybe-port)
+(read-line . maybe-port)
+
+(eof-object? object)
+
+
+Printer
+-------
+
+(internal-write object port)
+(internal-output-width port)
+(internal-output-position port)
+(internal-write-char char port)
+(internal-write-string string port start end)
+(internal-newline port)
+(internal-fresh-line port)
+(internal-finish-output port)
+(internal-force-output port)
+(internal-clear-output port)
+(internal-write-to-string object)
+(internal-warning string)
+(internal-error string)
+  These are all internal hooks.  Don't use them directly if you can
+  avoid it.
+
+(write object . maybe-stream)
+(print object . maybe-stream)
+(prin1 object . maybe-stream)
+(princ object . maybe-stream)
+(pprint object . maybe-stream)
+(prin1-to-string object)
+(princ-to-string object)
+(write-char char . maybe-stream)
+(write-string string . maybe-stream-start-end)
+(write-line string . maybe-stream-start-end)
+(terpri . maybe-stream)
+(fresh-line . maybe-stream)
+(finish-output . maybe-stream)
+(force-output . maybe-stream)
+(clear-output . maybe-stream)
+  These are the standard Common Lisp print functions.  All of them
+  accept either a port or an XP stream as a stream argument.
+
+(display object . maybe-stream)
+  Same as princ; for Scheme compatibility.
+(newline object . maybe-stream)
+  Same as terpri; for Scheme compatibility.
+
+
+*print-escape*
+*print-shared*
+*print-circle*
+*print-pretty*
+*print-level*
+*print-length*
+  These are the standard Common Lisp printer control variables.  The
+  functions listed above obey them.
+
+*print-base*
+*print-radix*
+*print-case*
+*print-readably*
+  These are more standard Common Lisp printer control variables, but
+  support for them hasn't been implemented yet.  Maybe some day.
+
+*print-dispatch*
+  This is the hook for user customization of the printer.  Its value is a 
+  function that is passed an object as an argument, and returns another
+  function that takes a stream and the object as arguments.
+
+*print-structure*
+  If true, use standard structure printing syntax (overriding any special
+  print function for the structure type).
+
+*print-structure-slots*
+  If true, recursively print structure slots when using standard structure
+  printing syntax; otherwise just print the structure type name.
+
+
+(standard-print-dispatch object)
+  This function is the initial value of *print-dispatch*.
+
+*print-right-margin*
+*print-miser-width*
+*print-lines*
+*default-right-margin*
+*last-abbreviated-printing*
+  These are the XP pretty-printer control variables.  For more information
+  about the pretty-printer, read the XP document.
+
+(pprint-newline kind . maybe-stream)
+  The kind argument can be one of LINEAR, FILL, MISER, or MANDATORY.
+
+(pprint-logical-block (stream-symbol list . more-options) . body)
+  This is a macro.  The body should contain code for printing a logical
+  block to the stream stream-symbol.
+
+  The format of the options is (stream-symbol list prefix suffix per-line?).
+  
+  The list argument can be used with the pprint-pop macro.
+
+  The prefix is a string that is printed as the initial prefix of the logical
+  block.  If per-line? is true, then the prefix is printed on every line.
+  The suffix is a string that is printed at the end of the logical block.
+
+  You can use this macro even when not pretty-printing, to get support
+  for *print-length* and *print-level*.  In that case, you should have
+  the body forms put out only a minimal amount of whitespace.
+
+(pprint-pop)
+  Returns the next item from the list specified to an enclosing 
+  pprint-logical-block.  Checks for circular list tails and *print-length*
+  abbreviation.
+
+(pprint-exit-if-list-exhausted)
+  Can be used inside pprint-logical-block to see if the list is empty.
+  Causes the block to be exited if so.
+
+(pprint-indent relative-to n . maybe-stream)
+  Specify the indentation level to use for a logical block.
+  The relative-to argument can be either BLOCK or CURRENT.
+
+(pprint-tab kind colnum colinc . maybe-stream)
+  Specify tabbing.  The kind argument can be one of LINE, SECTION,
+  LINE-RELATIVE, or SECTION-RELATIVE.
+  
+(pprint-fill stream list . maybe-colon-atsign)
+(pprint-linear stream list . maybe-colon-atsign)
+(pprint-tabular stream list . maybe-colon-atsign-tabsize)
+  Pretty-print list to the stream in the given style.
+  
+
+(format stream string-or-fn . args)
+  The standard Common Lisp format, except that some of the more esoteric
+  directives are unimplemented.  (Specifically, watch out for specifying
+  field widths or using # or V parameters; most of the numeric formatting
+  options are unimplemented, as are complicated directives like ~{...~}.)
+
+  The stream parameter can be #f to output to a string, or #t to output
+  to the (current-output-port).
+
+  The string-or-fn argument can be a function as well as a string containing
+  embedded directives.  The function is applied to the stream and the args.
+
+(warning string-or-fn . args)
+(error string-or-fn . args)
+
+
+
+System Interface
+----------------
+
+(macroexpand-1 form . maybe-env)
+(macroexpand form . maybe-env)
+  As in Common Lisp.  Since we don't have lexical macros and don't allow
+  syntax to be shadowed by local bindings, you can omit the environment 
+  argument.  These functions are provided mostly for debugging purposes.
+
+(eval form . maybe-compile)
+  As in Common Lisp.  If the optional argument is supplied and is true,
+  try to compile the code in memory, not interpret it.
+
+(load filename)
+
+*code-quality*
+  A number between 0 and 3.  0 = minimal compilation, 1 = for debugging,
+  2 = low safety, high speed, fast compilation, 3 = go all out.
+
+(compile-file source-filename . maybe-binary-filename)
+
+(with-compilation-unit options . forms)
+  This is the ANSI CL macro.  We don't use any options.
+
+(filename-place filename)
+(filename-name filename)
+(filename-type filename)
+  We use a rather simplistic file system model.  Filenames are strings
+  with place (or directory), name, and type components.  These functions
+  pick apart filename strings.  You shouldn't have to mess with string 
+  operations on the components directly.  
+
+(assemble-filename place-filename name-filename type-filename)
+  Build a new filename by combining the appropriate parts of the argument
+  filenames.
+
+source-file-type
+binary-file-type
+  These constants hold appropriate default types for source and
+  compiled files.  By convention, source-file-type is ".scm" but
+  the binary-file-type depends on the underlying Lisp system.
+
+(file-exists? filename)
+  Returns true if the file exists.
+
+(file-write-date filename)
+(current-date)
+  Dates are represented as integers relative to an arbitrary base.  These
+  functions are mostly useful for recording timestamps.
+
+(get-run-time)
+  Return run time as a floating-point number relative to an arbitrary base.
+  Useful for doing timings.
+
+(getenv name)
+  Explicitly expand an environment variable.  (Environment variables that
+  appear as filename prefixes are expanded automagically by the functions 
+  that open files.)
+
+(cd filename)
+  Change the current directory.
+
+
+(exit)
+  Go away.
+
+
+Reader Support
+--------------
+
+' => quote
+` => backquote; also , and ,@
+#t and #f
+
+
+Random Stuff
+------------
+
+lisp-implementation-name
+  returns a string identifying the underlying lisp implementation; e.g.
+  "lucid", "t", etc.
+
+(identify-system)
+  return a longer string indentifying the lisp version and machine type.
+
+left-to-right-evaluation
+  True if the underlying Lisp always evaluates function arguments
+  left-to-right; false otherwise.
+
+(gc-messages onoff)
+  Turn garbage collection messages on/off, if possible.
+
+(identity x)
+  The identity function.
+
+
+
+Type specifiers
+---------------
+
+t
+procedure
+pair
+null
+list, (list element-type)
+symbol
+char
+string
+vector
+number
+integer
+rational
+float
+fixnum, int
+table, (table key-type value-type)
+(enum . values)
+(tuple . component-types)
+bool
+alist, (alist key-type value-type)
+(maybe type)
+struct
+type-descriptor
+slot-descriptor
+  These are the standard type specifiers.
+
+the
+  As in Common Lisp.
+subtype?
+  Equivalent to CL subtypep
+is-type?
+  Equivalent to CL typep
+typecase
+  As in Common Lisp, also recognizes "else" clause.
+  
+
+
+Structures
+----------
+
+(struct? object)
+  Returns true if the object is a struct.
+(struct-type-descriptor object)
+  Returns the type descriptor of a struct object.
+
+name, slots, parent-type, printer
+  Slots of type-descriptor object.
+
+(td-name td)
+(td-slots td)
+(td-parent-type td)
+(td-printer td)
+  Accessors for type-descriptors.
+
+name, type, default, getter
+  Slots of slot-descriptor object.
+
+(sd-name sd)
+(sd-type sd)
+(sd-default sd)
+(sd-getter sd)
+  Accessors for slot-descriptors.
+(sd-getter-function sd)
+  Returns a function which can be used to access a slot (as opposed to
+  the symbol that names the function).
+
+(lookup-type-descriptor type-name)
+(lookup-slot-descriptor type-name slot-name)
+  Name to descriptor mappings.
+
+
+(make type . initializers)
+  The type must name a struct type; it is not evaluated.
+  The initializers are of the form (slot-name value-form).
+
+(struct-slot type slot object)
+  Generalized slot access.  Type and slot are symbols.  If both are
+  quoted, can be used with SETF.
+
+(with-slots type slot-names object . body)
+  Binds the specified slots of object to local variables with the
+  same names.  Bindings are read-only.  Type is not evaluated.
+
+(update-slots type object . initializers)
+  Modifies the slots of object.  Syntax of initializers is as for make.
+  Type is not evaluated.
+
+(define-struct name
+  (include parent-type-name)
+  (type-template subtype-of-type-descriptor)
+  (prefix prefix-symbol)
+  (predicate predicate-name)
+  (slots
+    (slot-name
+      (type type)
+      (default init-form)
+      (bit #t)
+      (read-only? #t)
+      (uninitialized? #t))
+    ...))
+
+  Defines name as a subtype of struct with the given slots.
+  All fields are optional.
+
+  Include specifies the immediate supertype.  All accessors on the supertype
+  work on the newly defined type.  It defaults to struct.
+
+  Type-template specifies the metaclass.  It can be used to attach 
+  additional information to the type descriptor.  It defaults to 
+  type-descriptor.
+
+  Prefix can be used to specify an alternate prefix for accessors.  The
+  default is name-.
+
+  Predicate can be used to create a predicate function.  The default is
+  not to create one.
+
+  If no default is specified for a slot, it's expected to have an
+  explicit initializer supplied with MAKE.  You'll get a compilation
+  warning otherwise, unless you specify the uninitialized? option instead.
+
+  Bit is a hint for optimizing internal representation.
+
+  Read-only? says not to create a SETFer for the slot.
+
+
+(define-struct-printer struct-name printer-function)
+  Specifies a printer function to use when *print-structure* is false.
+

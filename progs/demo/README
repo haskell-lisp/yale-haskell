@@ -1,0 +1,15 @@
+
+This directory contains Haskell demo programs.  All of these programs
+compile and execute properly.
+
+This directory contains:
+
+
+fact.hs			factorial
+merge.hs		merge sort	
+pfac.hs			parallel factorial
+primes.hs		prime number generator
+qs.hs			quick sort
+queens.hs               N queens
+symalg/                 A symbolic algebra program
+prolog/                 A prolog interpreter

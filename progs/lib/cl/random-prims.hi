@@ -1,0 +1,20 @@
+-- random-prims.hi -- interface file to random number primitives
+--
+-- author :  Sandra Loosemore
+-- date   :  22 June 1993
+--
+
+
+interface RandomPrims where
+
+randomInt	:: Int -> IO Int
+randomInteger   :: Integer -> IO Integer
+randomFloat     :: Float -> IO Float
+randomDouble    :: Double -> IO Double
+
+{-#
+randomInt	:: LispName("lisp:random"), Complexity(5)
+randomInteger	:: LispName("lisp:random"), Complexity(5)
+randomFloat	:: LispName("lisp:random"), Complexity(5)
+randomDouble	:: LispName("lisp:random"), Complexity(5)
+#-}

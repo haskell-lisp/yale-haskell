@@ -1,0 +1,37 @@
+This is the main directory for the 2.x release of Yale Haskell.  This
+file contains some basic information about how the system is organized
+and put together.
+
+You should set the variable $HASKELL and source the haskell-setup
+script in this directory before attempting to use Yale Haskell.
+
+If you are rebuilding from the source release, see the scripts and
+README files in the $HASKELL/com area.  You also need to modify
+the haskell-development script.
+
+Yale-specific information:
+
+Source files in this directory area are under RCS control.  Use the
+`rci' and `rco' aliases (from haskell-development) to check things in
+and out.  By convention, each directory containing source files should
+have subdirectories named RCS (for RCS files), t (for compiled T
+files), lucid (for compiled Lucid CL files), and cmu (for compiled CMU
+CL files).
+
+Each subdirectory containing source files should also have a file that
+defines a compilation unit for that subdirectory.  (See
+support/compile.scm for information about the compilation unit
+utility.)  support/system.scm loads all the compilation unit definitions.
+
+To load the system into Common Lisp, you need to load the file
+support/cl-support/cl-init.lisp.  This will automagically compile any
+outdated or missing files.  However, you need to type in an
+(in-package "MUMBLE-USER") once it finishes.
+
+Don't try to load the system into T.  It's broken!  See
+support/t-support/t-init.t.
+
+All system-dependent code goes in either support/cl-support or
+support/t-support.  For information about the mumble compatibility
+package used as the implementation language for the rest of the
+system, see support/mumble.txt.

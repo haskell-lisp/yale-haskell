@@ -1,0 +1,4 @@
+:output $PRELUDEBIN/PreludeArrayPrims
+:stable
+:prelude
+PreludeArrayPrims.hi

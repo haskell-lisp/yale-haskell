@@ -1,0 +1,35 @@
+#!/bin/csh
+#
+# build-prelude -- recompile the prelude, saving the old one as old-prelude.*
+#
+#
+cd $Y2
+setenv PRELUDEBIN $Y2/progs/prelude/lispworks
+if (-e $PRELUDEBIN/Prelude.wfasl) then
+  rm $PRELUDEBIN/old*
+  foreach i ($PRELUDEBIN/Prelude*.{wfasl,scm})
+    mv $i $PRELUDEBIN/old-$i:t
+    end
+  endif
+$LISPWORKS <<EOF
+(load "com/lispworks/patches/safe-fo-closure.wfasl")
+(make-package "MUMBLE-IMPLEMENTATION" :use '("LISP"))
+;; Need a bigger than normal stack for compiling the prelude.
+(setf system::*stack-overflow-behaviour* :warn)
+;; Need a big heap to compile the prelude.
+;(lcl:change-memory-management :expand 512 :growth-limit 2048)
+;; If you want to recompile
+;; everything from scratch, execute the "clean" script first, or
+;; else use the "compile" script to do this.
+(proclaim '(optimize (speed 3) (safety 0) (compilation-speed 0)))
+(load "cl-support/cl-init")
+(in-package :mumble-user)
+(setf *printers* '(phase-time dump-stat))
+(setf *optimizers* *all-optimizers*)
+;; Set appropriate compiler settings for processing the prelude.
+;; Don't try to compile the interface files.
+(setf *code-chunk-size* 300)
+(setf *compile-interface* '#f)
+(compile/compile *prelude-unit-filename*)
+(lw:bye)
+EOF

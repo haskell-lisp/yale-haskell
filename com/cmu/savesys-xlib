@@ -1,0 +1,57 @@
+#!/bin/csh
+#
+# savesys-xlib -- build a saved executable in bin/new-cmu-clx-haskell.core
+#
+#
+cd $Y2
+setenv PRELUDEBIN $Y2/progs/prelude/cmu
+if !(-e $PRELUDEBIN/Prelude.sparcf) then
+  echo "Build the prelude first, stupid..."
+  exit
+  endif
+setenv CLXFILE /net/nebula/homes/systems/hcompile/cmu/lib/subsystems/clx-library.sparcf
+setenv LIBRARYBIN $Y2/progs/lib/bin/cmu
+if !(-e $LIBRARYBIN/xlib.sparcf) then
+  echo "Build the xlib stuff first, silly..."
+  exit
+  endif
+$CMUCL <<EOF
+;;; Load the Haskell system.
+(make-package "MUMBLE-IMPLEMENTATION" :use '("LISP"))
+(load "cl-support/cl-init")
+;;; Set various internal switches to appropriate values for running
+;;; Haskell code.
+(setf ext:*bytes-consed-between-gcs* 4000000)
+(proclaim '(optimize (speed 3) (safety 0) (debug 0) (ext:inhibit-warnings 3)))
+(setf *load-verbose* nil)
+(setf *compile-verbose* nil)
+(in-package :mumble-user)
+(gc-messages '#f)
+(setf *printers* '(compiling loading))
+(setf *optimizers* '())
+(setf *compile-interface* '#f)
+;;; Load the prelude.
+(compile/load *prelude-unit-filename*)
+;;; Load the X support.
+(load "\$CLXFILE")
+(compile/load "\$HASKELL_LIBRARY/X11/xlib")
+(setf *haskell-compiler-update* 
+	(string-append *haskell-compiler-update* "-X11"))
+;;; Set up the saved system.
+(define (haskell-toplevel)
+  (load-init-files)
+  (do () ('#f)
+    (lisp:with-simple-restart (restart-haskell "Restart Haskell.")
+      (heval))))
+(define (restart-haskell)
+  (lisp:invoke-restart 'restart-haskell))
+(ext:save-lisp "bin/new-cmu-clx-haskell.core"
+  :purify '#t
+  :root-structures '()
+  :init-function 'haskell-toplevel
+  :load-init-file '#f
+  :site-init '#f
+  :print-herald '#f
+  )
+(ext:quit)
+EOF

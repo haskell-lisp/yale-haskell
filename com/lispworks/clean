@@ -1,0 +1,5 @@
+#!/bin/csh
+#
+# delete lispworks binaries
+'rm' $Y2/*/lispworks/*.{wfasl}
+

@@ -1,0 +1,4 @@
+#!/bin/csh
+#
+# delete AKCL binaries
+'rm' $Y2/*/akcl/*.o

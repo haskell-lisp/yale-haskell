@@ -1,0 +1,10 @@
+This directory contains the files for the compiler backend.  All of these
+phases operate on FLIC code.
+
+optimize -- performs various tweaks to compact the code and make it faster.
+  also includes a postpass to fill in some additional structure slots.
+
+strictness -- attaches strictness information to functions and decides
+  whether locally-bound variables have a boxed or unboxed representation.
+
+codegen -- generates Lisp code from the optimized FLIC code.

@@ -1,0 +1,4 @@
+:output $PRELUDEBIN/PreludeTuplePrims
+:stable
+:prelude
+PreludeTuplePrims.hi

@@ -1,0 +1,3 @@
+:o= foldr inline constant
+$HASKELL_LIBRARY/X11/xlib.hu
+henderson.hs

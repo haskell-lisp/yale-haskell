@@ -1,0 +1,32 @@
+(define-compilation-unit type
+  (source-filename "$Y2/type/")
+  (require ast haskell-utils)
+  (unit type-macros
+        (source-filename "type-macros.scm"))
+  (unit unify
+	(require type-macros)
+	(source-filename "unify.scm"))
+  (unit type-main
+	(require type-macros)
+	(source-filename "type-main.scm"))
+  (unit type-decl
+	(require type-macros)
+	(source-filename "type-decl.scm"))
+  (unit dictionary
+	(require type-macros)
+	(source-filename "dictionary.scm"))
+  (unit default
+	(require type-macros)
+	(source-filename "default.scm"))
+  (unit pattern-binding
+	(require type-macros)
+	(source-filename "pattern-binding.scm"))
+  (unit type-vars
+	(require type-macros)
+	(source-filename "type-vars.scm"))
+  (unit expression-typechecking
+	(require type-macros)
+	(source-filename "expression-typechecking.scm"))
+  (unit type-error-handlers
+	(require type-macros)
+	(source-filename "type-error-handlers.scm")))

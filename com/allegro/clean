@@ -1,0 +1,5 @@
+#!/bin/csh
+#
+# delete Allegro CL binaries
+'rm' $Y2/*/$ALLEGRODIR/*.fasl
+

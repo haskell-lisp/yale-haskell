@@ -1,0 +1,104 @@
+Ki-Wing Ho and Eric Fox
+Computer Science 429b
+Professor Hudak
+Final Project:  User Manual
+
+
+Control Commands:
+
+
+(DO <clause> WHILE <cond>)
+
+   Loop, executing a list of commands, then checking a condition and
+looping again if the condition is true.
+
+
+(REPEAT n TIMES)
+  WHILE cn cl
+  IF cn THEN cl1 [ELSE cl2]
+
+Load a file:
+  USE "filename
+
+Environment Commands:
+  MAKE "nm v
+  LOCAL "nm
+  TO :nm1 :nm2 :nm3 ... cl
+
+Text I/O:
+  PRINT v
+  READ
+
+Graphics Commands:
+  FORWARD n
+  BACKWARD n
+  SETXY n1 n2
+  LEFT n
+  RIGHT n
+  PENUP
+  PENDOWN
+  HIDETURTLE
+  SHOWTURTLE
+  CLEARSCREEN
+  CLEAN
+
+Graphics Functions:
+  XCOR
+  YCOR
+  GETANGLE
+  GETPEN
+  GETTURTLE
+
+Mathematical:
+  SUM n1 n2
+  DIFFERENCE n1 n2
+  PRODUCT n1 n2
+  MOD n1 n2
+  DIV n1 n2
+  POWER n1 n2
+
+Boolean:
+  AND b1 b2
+  OR b1 b2
+  NOT b
+
+Predicates:
+  WORDP v
+  LISTP v
+  NUMBERP v
+  GREATER n1 n2
+  LESS n1 n2
+  EQUAL v1 v2
+  
+Word/List:
+  FIRST t
+  LAST t
+  FPUT t l
+  BUTFIRST l
+  WORD w1 w2 w3 ...
+  LIST t1 t2 t3 ...
+  CONCAT l1 l2
+  SENTENCE t1 t2 t3 ...
+
+
+Our Logo interpreter will only support one of the three windowing
+modes: window mode, where the turtle, if it walks off the end of the
+screen, just continues going and does not wrap.  The two (unsupported)
+modes are fence mode where the turtle cannot walk off the end, and
+wrap mode.  The initial turtle state will be with the turtle hidden,
+the pen down, and the turtle in the center of the screen facing
+upwards.
+
+All input (both for commands as well as user-input) will be
+case-insensitive, and the interpreter needs to handle lists, words,
+integers, and boolean values.  Also, typing "GoodBye" at the LOGO>
+prompt exits the interpreter.
+
+All commands will be enclosed in parentheses, and all lists of
+commands will be enclosed in square brackets, so that there is no
+longer any need for the keyword "End". Also, all procedures will
+return the value of their last command, so that there are no Stop or
+Output commands.  IF statements should return the value of the last
+statement executed, but all looping constructs should return no value.
+
+

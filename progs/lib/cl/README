@@ -1,0 +1,2 @@
+This directory contains some libraries which allow you to use various
+Common Lisp primitives from Haskell.

@@ -1,0 +1,4 @@
+:output $LIBRARYBIN/
+:o= all
+random.hs
+random-prims.hi

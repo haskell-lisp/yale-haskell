@@ -1,0 +1,788 @@
+
+(provide (quote haskell))
+
+(require (quote comint))
+
+(defvar haskell-program-name (getenv "HASKELLPROG") "\
+*Program invoked by the haskell command")
+
+(defvar *haskell-buffer* "*haskell*" "\
+*Name of the haskell process buffer")
+
+(defvar *haskell-show-error* 1 "\
+*If not nil move to the buffer where the error was found")
+
+(defvar haskell-auto-create-process t "\
+*If not nil, create a Haskell process automatically when required to evaluate or compile Haskell code")
+
+(defvar *haskell-debug-in-lisp* nil "\
+*If not nil, enter Lisp debugger on error; otherwise, automagically return
+to Haskell top-level.")
+
+(defvar *emacs* nil "\
+When not nil means haskell is in emacs mode")
+
+(defvar haskell-main-pad "*Main-pad*" "\
+Scratch pad associated with module Main")
+
+(defvar haskell-main-file "Main")
+
+(defvar haskell-main-module "Main")
+
+(defvar *last-loaded* haskell-main-file "\
+Last file loaded with a :load command - Defaults to Main")
+
+(defvar *last-loaded-modtime* nil "\
+Modification time of last file loaded, used to determine whether it
+needs to be reloaded.")
+
+(defvar *last-module* haskell-main-module "\
+Last module set with a :module command - Defaults to Main")
+
+(defvar *last-pad* haskell-main-pad "\
+Last pad saved with a :save command - Defaults to Main")
+
+(defvar *ht-source-file* "$HASKELL/progs/tutorial/tutorial.hs")
+
+(defvar *ht-temp-buffer* nil)
+
+(defvar *ht-file-buffer* "Haskell-Tutorial-Master")
+
+(defvar haskell-mode-map nil "\
+Keymap used for haskell-mode")
+
+(defun haskell-establish-key-bindings (keymap) (byte-code "ÁÂÃ#ˆÁÄÅ#ˆÁÆÇ#ˆÁÈÉ#ˆÁÊË#ˆÁÌÍ#ˆÁÎÏ#ˆÁÐÑ#ˆÁÒÓ#ˆÁÔÕ#ˆÁÖ×#ˆÁØÙ#ˆÁÚÛ#ˆÁÜÝ#ˆÁÞß#ˆÁàá#ˆÁâã#‡" [keymap define-key "e" haskell-eval "r" haskell-run "m" haskell-run-main "" haskell-run-file "p" haskell-get-pad "" haskell-optimizers "" haskell-printers "c" haskell-compile "l" haskell-load "h" haskell-switch ":" haskell-command "q" haskell-exit "i" haskell-interrupt "u" haskell-edit-unit "d" haskell-please-recover "(" haskell-ensure-lisp-mode ")" haskell-resume-command-loop] 20))
+
+(if haskell-mode-map nil (progn (setq haskell-mode-map (make-sparse-keymap)) (haskell-establish-key-bindings haskell-mode-map)))
+
+(defvar haskell-mode-syntax-table nil "\
+Syntax table used for haskell-mode")
+
+(if haskell-mode-syntax-table nil (setq haskell-mode-syntax-table (standard-syntax-table)))
+
+(defun haskell-mode nil "\
+Major mode for editing Haskell code to run in Emacs
+The following commands are available:
+\\{haskell-mode-map}
+
+A Haskell process can be fired up with \"M-x haskell\". 
+
+Customization: Entry to this mode runs the hooks that are the value of variable 
+haskell-mode-hook.
+
+Windows:
+
+There are 3 types of windows associated with Haskell mode.  They are:
+   *haskell*:  which is the process window.
+   Pad:        which are buffers available for each module.  It is here
+               where you want to test things before preserving them in a
+               file.  Pads are always associated with a module.
+               When issuing a command:
+                 The pad and its associated module are sent to the Haskell
+                 process prior to the execution of the command.
+   .hs:        These are the files where Haskell programs live.  They
+               have .hs as extension.
+               When issuing a command:
+                 The file is sent to the Haskell process prior to the
+                 execution of the command.
+
+Commands:
+
+Each command behaves differently according to the type of the window in which 
+the cursor is positioned when the command is issued .
+
+haskell-eval:   \\[haskell-eval]
+  Always promts user for a Haskell expression to be evaluated.  If in a
+  .hs file buffer, then the cursor tells which module is the current 
+  module and the pad for that module (if any) gets loaded as well.
+
+haskell-run:    \\[haskell-run]
+  Always queries for a variable of type Dialogue to be evaluated.
+
+haskell-run-main:    \\[haskell-run-main]
+  Run Dialogue named main.
+
+haskell-run-file:   \\[haskell-run-file]
+  Runs a file.  Ideally the file has a set of variable of type Dialogue
+  that get evaluated.
+
+haskell-mode:   \\[haskell-mode]
+  Puts the current buffer in haskell mode.
+
+haskell-compile:   \\[haskell-compile]
+  Compiles file in current buffer.
+
+haskell-load:   \\[haskell-load]
+  Loads file in current buffer.
+
+haskell-pad:   \\[haskell-pad]
+  Creates a scratch pad for the current module.
+
+haskell-optimizers:  \\[haskell-optimizers]
+  Shows the list of available optimizers.  Commands for turning them on/off.
+
+haskell-printers:  \\[haskell-printers]
+  Shows the list of available printers.  Commands for turning them on/off.
+
+haskell-command:   \\[haskell-command]
+  Prompts for a command to be sent to the command interface.  You don't
+  need to put the : before the command.
+
+haskell-quit:   \\[haskell-quit]
+  Terminates the haskell process.
+
+switch-to-haskell:   \\[switch-to-haskell]
+  Switchs to the inferior Haskell buffer (*haskell*) and positions the
+  cursor at the end of the buffer.
+
+haskell-interrupt:   \\[haskell-interrupt]
+  Interrupts haskell process and resets it.
+
+haskell-edit-unit:   \\[haskell-edit-unit]
+  Edit the .hu file for the unit containing this file.
+" (interactive) (byte-code "ÅˆÆ ˆÇ!ˆÈ‰ˆÉ‰ˆÊÃ!ˆË‰ˆÌ!ˆÍÎ!‡" [haskell-mode-map major-mode mode-name indent-line-function haskell-mode-syntax-table nil kill-all-local-variables use-local-map haskell-mode "Haskell" make-local-variable indent-relative-maybe set-syntax-table run-hooks haskell-mode-hook] 6))
+
+(defvar inferior-haskell-mode-map nil)
+
+(if inferior-haskell-mode-map nil (setq inferior-haskell-mode-map (full-copy-sparse-keymap comint-mode-map)) (haskell-establish-key-bindings inferior-haskell-mode-map) (define-key inferior-haskell-mode-map "" (quote haskell-send-input)))
+
+(defvar haskell-source-modes (quote (haskell-mode)) "\
+*Used to determine if a buffer contains Haskell source code.
+If it's loaded into a buffer that is in one of these major modes, 
+it's considered a Haskell source file.")
+
+(defvar haskell-prev-l/c-dir/file nil "\
+Caches the (directory . file) pair used in the last invocation of
+haskell-run-file.")
+
+(defvar haskell-prompt-pattern "^[A-Z]\\([A-Z]\\|[a-z]\\|[0-9]\\)*>\\s-*" "\
+Regular expression capturing the Haskell system prompt.")
+
+(defvar haskell-prompt-ring nil "\
+Keeps track of input to haskell process from the minibuffer")
+
+(defvar tea-prompt-pattern "^>+\\s-*" "\
+Regular expression capturing the T system prompt.")
+
+(defvar haskell-version "Yale University Haskell Version 0.8, 1991" "\
+Current Haskell system version")
+
+(defun inferior-haskell-mode-variables nil (byte-code "À‡" [nil] 1))
+
+(defun inferior-haskell-mode nil "\
+Major mode for interacting with an inferior Haskell process.
+
+The following commands are available:
+\\{inferior-haskell-mode-map}
+
+A Haskell process can be fired up with \"M-x haskell\". 
+
+Customization: Entry to this mode runs the hooks on comint-mode-hook and
+inferior-haskell-mode-hook (in that order).
+
+You can send text to the inferior Haskell process from other buffers containing
+Haskell source.  
+
+
+Windows:
+
+There are 3 types of windows in the inferior-haskell-mode.  They are:
+   *haskell*:  which is the process window.
+   Pad:        which are buffers available for each module.  It is here
+               where you want to test things before preserving them in a
+               file.  Pads are always associated with a module.
+               When issuing a command:
+                 The pad and its associated module are sent to the Haskell
+                 process prior to the execution of the command.
+   .hs:        These are the files where Haskell programs live.  They
+               have .hs as extension.
+               When issuing a command:
+                 The file is sent to the Haskell process prior to the
+                 execution of the command.
+
+Commands:
+
+Each command behaves differently according to the type of the window in which 
+the cursor is positioned when the command is issued.
+
+haskell-eval:   \\[haskell-eval]
+  Always promts user for a Haskell expression to be evaluated.  If in a
+  .hs file, then the cursor tells which module is the current module and
+  the pad for that module (if any) gets loaded as well.
+
+haskell-run:    \\[haskell-run]
+  Always queries for a variable of type Dialogue to be evaluated.
+
+haskell-run-main:    \\[haskell-run-main]
+  Run Dialogue named main.
+
+haskell-run-file:   \\[haskell-run-file]
+  Runs a file.  Ideally the file has a set of variable of type Dialogue
+  that get evaluated.
+
+haskell-mode:   \\[haskell-mode]
+  Puts the current buffer in haskell mode.
+
+haskell-compile:   \\[haskell-compile]
+  Compiles file in current buffer.
+
+haskell-load:   \\[haskell-load]
+  Loads file in current buffer.
+
+haskell-pad:   \\[haskell-pad]
+  Creates a scratch pad for the current module.
+
+haskell-optimizers:  \\[haskell-optimizers]
+  Shows the list of available optimizers.  Commands for turning them on/off.
+
+haskell-printers:  \\[haskell-printers]
+  Shows the list of available printers.  Commands for turning them on/off.
+
+haskell-command:   \\[haskell-command]
+  Prompts for a command to be sent to the command interface.  You don't
+  need to put the : before the command.
+
+haskell-quit:   \\[haskell-quit]
+  Terminates the haskell process.
+
+switch-to-haskell:   \\[switch-to-haskell]
+  Switchs to the inferior Haskell buffer (*haskell*) and positions the
+  cursor at the end of the buffer.
+
+haskell-interrupt:   \\[haskell-interrupt]
+  Interrupts haskell process and resets it.
+
+haskell-edit-unit:   \\[haskell-edit-unit]
+  Edit the .hu file for the unit containing this file.
+
+The usual comint functions are also available. In particular, the 
+following are all available:
+
+comint-bol: Beginning of line, but skip prompt. Bound to C-a by default.
+comint-delchar-or-maybe-eof: Delete char, unless at end of buffer, in 
+            which case send EOF to process. Bound to C-d by default.
+
+Note however, that the default keymap bindings provided shadow some of
+the default comint mode bindings, so that you may want to bind them 
+to your choice of keys. 
+
+Comint mode's dynamic completion of filenames in the buffer is available.
+(Q.v. comint-dynamic-complete, comint-dynamic-list-completions.)
+
+If you accidentally suspend your process, use \\[comint-continue-subjob]
+to continue it." (interactive) (byte-code "ËˆÌ ˆ	‰ˆÍ ˆÎ‰ˆÏ‰ˆÐ‰ˆÑ!ˆÒ‰ˆÓ‰ˆÔ‰ˆÕÖ!ˆ×
+!‰	‡" [comint-prompt-regexp haskell-prompt-pattern major-mode mode-name mode-line-process inferior-haskell-mode-map comint-input-filter comint-input-sentinel comint-get-old-input haskell-prompt-ring input-ring-size nil comint-mode inferior-haskell-mode-variables inferior-haskell-mode "Inferior Haskell" (": %s : busy") use-local-map haskell-input-filter ignore haskell-get-old-input run-hooks inferior-haskell-mode-hook make-ring] 7))
+
+(defvar inferior-haskell-mode-hook (quote haskell-fresh-start) "\
+*Hook for customizing inferior-Haskell mode")
+
+(defun haskell-input-filter (str) "\
+Don't save whitespace." (byte-code "ÁÂ\"?‡" [str string-match "\\s *"] 3))
+
+(defvar *haskell-status* (quote dead) "\
+Status of the haskell process")
+
+(defun set-haskell-status (value) (byte-code "	‰ˆÂ ‡" [*haskell-status* value update-mode-line] 2))
+
+(defun get-haskell-status nil (byte-code "‡" [*haskell-status*] 1))
+
+(defun update-mode-line nil (byte-code "Šqˆ	Ä=ƒ Å‰‚7 	Æ=ƒ Ç‰‚7 	È=ƒ( É‰‚7 	Ê=ƒ4 Ë‰‚7 ÌÍ!ˆÎÏ !)‡" [*haskell-buffer* *haskell-status* mode-line-process t ready (": %s: ready") input (": %s: input") busy (": %s: busy") dead (": %s: dead") haskell-mode-error "Confused about status of haskell process!" set-buffer-modified-p buffer-modified-p] 4))
+
+(defvar *haskell-saved-output* nil)
+
+(defun process-haskell-output (process str) "\
+Filter for output from Yale Haskell command interface" (byte-code "ÆÆÇ ÈŽ… P‰ˆÅ‰ˆÉ	\"‰…< 	=?…- Ê	O!ˆËÌ\"#‰ˆ‚ ˆÍ	\"‰ƒO ÅO‰‚S G‰ˆ	=?…a Ê	O!)+‡" [idx lastidx data *haskell-saved-output* str nil 0 match-data ((byte-code "Á!‡" [data store-match-data] 2)) ci-response-start haskell-display-output funcall ci-response-handler ci-prefix-start] 10))
+
+(defvar *ci-responses* (quote (("r" "" haskell-got-ready) ("i" "" haskell-got-input-request) ("e" "" haskell-got-error) ("p.*
+" "\\(p.*\\)?" haskell-got-printers) ("o.*
+" "\\(o.*\\)?" haskell-got-optimizers) ("s.*
+" "\\(s.*\\)?" haskell-got-message) ("
+-> " "
+\\(-\\(> ?\\)?\\)?" haskell-got-lisp-error) ("0\\] " "0\\(\\] ?\\)?" haskell-got-lisp-error) ("USER>>" "U\\(S\\(E\\(R\\(>>?\\)?\\)?\\)?\\)?" haskell-got-lisp-error) ("USER(.*):" "U\\(S\\(E\\(R\\((.*)?\\)?\\)?\\)?\\)?" haskell-got-lisp-error) ("USER .* : .* >" "U\\(S\\(E\\(R\\( .*\\( \\(:\\( .*\\( >?\\)?\\)?\\)?\\)?\\)?\\)?\\)?\\)?" haskell-got-lisp-error))))
+
+(defun command-match-regexp (x) (byte-code "@‡" [x] 1))
+
+(defun command-prefix-regexp (x) (byte-code "A@‡" [x] 1))
+
+(defun command-handler (x) (byte-code "AA@‡" [x] 1))
+
+(defun glue-together (extractor) (byte-code "ÄÅ	
+@\"ÆQ
+A…$ ÇÅ	@\"ÆR‰ˆA‰ˆ‚ ˆ*‡" [result extractor *ci-responses* stuff "\\(" funcall "\\)" "\\|\\("] 7))
+
+(defvar *ci-response-regexp* (glue-together (quote command-match-regexp)))
+
+(defvar *ci-prefix-regexp* (concat "\\(" (glue-together (quote command-prefix-regexp)) "\\)\\'"))
+
+(defun ci-response-start (str idx) (byte-code "Ã	
+#‡" [*ci-response-regexp* str idx string-match] 4))
+
+(defun ci-prefix-start (str idx) (byte-code "Ã	
+#‡" [*ci-prefix-regexp* str idx string-match] 4))
+
+(defun ci-response-handler (str idx) (byte-code "	Ã…
+ 
+?…+ ÆÇ@!#=ƒ# È@!‰‚' A‰ˆ‚ ˆ
+?…4 ÉÊ!ˆ
+*‡" [list *ci-responses* result nil str idx string-match command-match-regexp command-handler haskell-mode-error "Failed to find command handler!!!"] 6))
+
+(defun haskell-got-ready (str idx) (byte-code "ÁÂ!Ã ˆ)‡" [result match-end 0 haskell-reset] 3))
+
+(defun haskell-got-input-request (str idx) (byte-code "ÁÂ!Ã ˆ)‡" [result match-end 0 get-user-input] 3))
+
+(defun haskell-got-error (str idx) (byte-code "ÁÂ!Ã ˆ)‡" [result match-end 0 haskell-error-handler] 3))
+
+(defun haskell-got-printers (str idx) (byte-code "ÃÄ!Å	
+Æ\\ÇZO!ˆ)‡" [result str idx match-end 0 update-printers-list 2 1] 6))
+
+(defun haskell-got-optimizers (str idx) (byte-code "ÃÄ!Å	
+Æ\\ÇZO!ˆ)‡" [result str idx match-end 0 update-optimizers-list 2 1] 6))
+
+(defun haskell-got-message (str idx) (byte-code "ÃÄ!Å	
+Æ\\ÇZO!ˆ)‡" [result str idx match-end 0 message 2 1] 6))
+
+(defun haskell-got-lisp-error (str idx) (byte-code "Â	\"ˆ	G‡" [idx str haskell-handle-lisp-error] 3))
+
+(defun haskell-handle-lisp-error (location str) (byte-code "Ä	ÅO!ˆ
+… Æ ˆƒ Ç ‚ È ‡" [str location *emacs* *haskell-debug-in-lisp* haskell-display-output nil ding haskell-talk-to-lisp haskell-flush-commands-and-reset] 5))
+
+(defun loaded-tutorial-p nil (byte-code "… Â!… Ã	ÄÂ!!\"‡" [*ht-temp-buffer* *last-loaded* get-buffer equal buffer-file-name] 6))
+
+(defun haskell-flush-commands-and-reset nil (byte-code "Á ˆŠÂ!ˆÃ ˆÄ )‡" [*haskell-buffer* haskell-flush-command-queue switch-to-buffer haskell-ensure-lisp-mode haskell-resume-command-loop] 5))
+
+(defun haskell-talk-to-lisp nil (byte-code "Á!ˆdbˆÂ ‡" [*haskell-buffer* pop-to-buffer haskell-ensure-lisp-mode] 3))
+
+(defun haskell-resume-command-loop nil "\
+Resumes Haskell command processing after debugging in Lisp.  \\[haskell-resume-command-loop]" (interactive) (byte-code "Áˆ?… ÂÃÄ\"ˆÅ ‡" [*emacs* nil process-send-string "haskell" "(mumble-user::restart-haskell)
+" haskell-ensure-emacs-mode] 3))
+
+(defun haskell-display-output (str) (byte-code "Ã Ä=ƒ ŠqˆÅ	!)‚  Æ ÇŽÈ!ˆÅ	!))‡" [*haskell-buffer* str window get-haskell-status dead haskell-display-output-aux selected-window ((byte-code "Á!‡" [window select-window] 2)) pop-to-buffer] 6))
+
+(defun haskell-display-output-aux (str) (byte-code "Á ˆcˆÁ ‡" [str haskell-move-marker] 3))
+
+(defun get-user-input nil (byte-code "ÁÂ!ˆÃ!ˆdbˆÄÅ!ˆÆ ‡" [*haskell-buffer* message "Haskell is waiting for input..." pop-to-buffer set-haskell-status input haskell-pop-data-queue] 5))
+
+(defun haskell-error-handler nil (byte-code "Á ˆÂ ˆÃÄ!ˆÅÀ!‡" [nil ding haskell-flush-command-queue set-haskell-status ready haskell-end-interaction] 5))
+
+(defvar *yh-error-def* "Error occured in definition of\\s *")
+
+(defvar *yh-error-line* "at line\\s *")
+
+(defvar *yh-error-file* "of file\\s *")
+
+(defvar *haskell-line* "\\([0-9]\\)*")
+
+(defun haskell-show-error nil "\
+Point out error to user if possible" (byte-code "qˆŠÂÂÂÅ ‰… Æ ‰… Ç ‰…$ È	#+)‡" [*haskell-buffer* function-name nil line-number filename get-function-name get-line-number get-filename point-error-to-user] 7))
+
+(defvar *haskell-function-name* "\\([a-z]\\|[A-Z]\\|[0-9]\\|'\\|_\\|-\\)*")
+
+(defun get-function-name nil (byte-code "ÅeÁ#… ÆdÁ#ƒ& `ÆdÁ#ƒ! Ç
+`\"‚\" Ä)‚' Ä‡" [*yh-error-def* t beg *haskell-function-name* nil re-search-backward re-search-forward buffer-substring] 6))
+
+(defun get-line-number nil (byte-code "ÅdÁ#ƒ  `ÅdÁ#ƒ ÆÇ
+`\"!‚ Ä)‚! Ä‡" [*yh-error-line* t beg *haskell-line* nil re-search-forward string-to-int buffer-substring] 6))
+
+(defun get-filename nil (byte-code "ÄdÁ#ƒ `ÄÅdÁ#ƒ Æ
+`\"‚ Ã)‚ Ã‡" [*yh-error-file* t beg nil re-search-forward "\\($\\| \\|	\\)" buffer-substring] 5))
+
+(defun point-error-to-user (function-name line-number filename) (byte-code "ÄÅ\"ƒ Æ	!‚! Ç!È
+!ƒ Æ
+!‚  É!)ˆÊ!‡" [filename *last-pad* fname line-number equal "Interactive" pop-to-buffer strip-fext get-buffer find-file-other-window goto-line] 8))
+
+(defun haskell-reset nil (byte-code "ÀÁ!ˆÂ ‡" [set-haskell-status ready haskell-pop-command-queue] 3))
+
+(defvar *command-interface-queue* nil "\
+Contains the commands to be sent to the Haskell command interface")
+
+(defun haskell-queue-or-execute (fn request data) (byte-code "ƒ Å	
+BC\"‰‚$ Æ Ç=ƒ È
+\"‚$ 	
+BC‰‡" [*command-interface-queue* request data fn t nconc get-haskell-status ready funcall] 5))
+
+(defun haskell-send-command (str) "\
+Queues STRING for transmission to haskell process." (byte-code "ÁÂÃ#‡" [str haskell-queue-or-execute haskell-send-command-aux command] 4))
+
+(defun haskell-send-command-aux (str) (byte-code "ÁÂ\"ˆÁÂÃ\"ˆÄ Å=?… ÆÇ!‡" [str process-send-string "haskell" "
+" get-haskell-status input set-haskell-status busy] 5))
+
+(defvar *begin-interaction-delimiter* nil "\
+*Delimiter showing an interaction has begun")
+
+(defun haskell-begin-interaction (msg) (byte-code "ÁÂÃ#‡" [msg haskell-queue-or-execute haskell-begin-interaction-aux begin] 4))
+
+(defun haskell-begin-interaction-aux (msg) (byte-code "… Â!ˆ	… ÂÃ	ÃQ!‡" [*begin-interaction-delimiter* msg haskell-display-output "
+"] 5))
+
+(defvar *end-interaction-delimiter* nil "\
+*Delimiter showing an interaction has ended")
+
+(defun haskell-end-interaction (msg) (byte-code "ÁÂÃ#‡" [msg haskell-queue-or-execute haskell-end-interaction-aux end] 4))
+
+(defun haskell-end-interaction-aux (msg) (byte-code "… Â!ˆ	… ÃÄ	\"‡" [*end-interaction-delimiter* msg haskell-display-output message "%s"] 4))
+
+(defun haskell-send-data (str) (byte-code "ÄÅ\"ƒ ÆÅ	BCÂ$‰‚/ Ç È=†  Ç É=ƒ) Ê	!‚/ Å	BC‰‡" [*command-interface-queue* str nil t assoc data merge-data-into-queue get-haskell-status ready input haskell-send-command-aux] 7))
+
+(defun merge-data-into-queue (new head tail lasttail) (byte-code "?ƒ Å	
+\"ˆ‚8 @@Æ=ƒ  Ç
+A$‚8 	ƒ2 Å	
+\"ˆÅ
+\"ˆ‚8 Å
+\"ˆ
+‡" [tail lasttail new head t rplacd data merge-data-into-queue] 7))
+
+(defun haskell-pop-command-queue nil (byte-code "…N @A‰ˆ	@Ã=ƒ Ä	A!‚M 	@Å=ƒ+ Æ	A!ˆÇ ‚M 	@È=ƒ< É	A!ˆÇ ‚M 	@Ê=ƒJ Ä	A!‚M ËÌ!)‡" [*command-interface-queue* entry t command haskell-send-command-aux begin haskell-begin-interaction-aux haskell-pop-command-queue end haskell-end-interaction-aux data haskell-mode-error "Invalid command in queue!!!"] 8))
+
+(defun haskell-pop-data-queue nil (byte-code "… @	@Â=… A‰ˆÃ	A!ˆÄ )‡" [*command-interface-queue* entry data haskell-send-command-aux haskell-pop-data-queue] 3))
+
+(defun haskell-flush-command-queue nil (byte-code "Á‰‡" [*command-interface-queue* nil] 2))
+
+(defun haskell nil "\
+Run an inferior Haskell process with input and output via buffer *haskell*.
+Takes the program name from the variable haskell-program-name.  
+Runs the hooks from inferior-haskell-mode-hook 
+(after the comint-mode-hook is run).
+(Type \\[describe-mode] in the process buffer for a list of commands.)" (interactive) (byte-code "ÃˆÄ	!… Å!?…& ÆÇÈ
+ÃÃ%‰ˆŠqˆÉ )ˆÊ!)‡" [haskell-buffer *haskell-buffer* haskell-program-name nil get-buffer comint-check-proc apply make-comint "haskell" inferior-haskell-mode display-buffer] 8))
+
+(defun haskell-fresh-start nil (byte-code "ÈÉ!ˆÁ‰ˆ‰ˆ‰ˆÁ‰ˆÁ‰ˆÊ ‡" [*command-interface-queue* nil *last-loaded* haskell-main-file *last-pad* haskell-main-pad *emacs* *haskell-saved-output* set-haskell-status busy haskell-ensure-emacs-mode] 3))
+
+(defun haskell-maybe-create-process nil (byte-code "… Á ‡" [haskell-auto-create-process haskell] 2))
+
+(defun haskell-ensure-emacs-mode nil (byte-code "Â ˆÁ‰ˆÃ ‡" [*emacs* t create-main-pad ci-emacs] 3))
+
+(defun haskell-ensure-lisp-mode nil "\
+Switch to talking to Lisp.  \\[haskell-ensure-lisp-mode]" (interactive) (byte-code "ÁˆÁ‰‡" [*emacs* nil] 2))
+
+(defun haskell-get-pad nil "\
+Creates a new scratch pad for the current module.
+Signals an error if the current buffer is not a .hs file." (interactive) (byte-code "ÁˆÂ ƒ Ãp\"‚ ÄÅ!)‡" [fname nil buffer-file-name do-get-pad haskell-mode-error "Not in a .hs buffer"] 4))
+
+(defun do-get-pad (fname buff) (byte-code "Æ	!†
+ ÇÈÂ\"É\"Â?† Ê!‰?…7 Ë!‰ˆÌ!‰ˆÍ!‰ˆÎ#ˆÏ!ˆÐ +‡" [mname buff nil pname fname pbuff get-modname read-no-blanks-input "Scratch pad for module? " lookup-pad get-buffer get-padname generate-new-buffer buffer-name record-pad-mapping pop-to-buffer haskell-mode] 11))
+
+(defun haskell-switch nil "\
+Switches to *haskell* buffer" (interactive) (byte-code "ÁˆÂ ˆÃÀ!‡" [t nil haskell-maybe-create-process switch-to-haskell] 3))
+
+(defun switch-to-haskell (eob-p) "\
+Really switch to the *haskell* buffer.
+With argument, positions cursor at end of buffer." (interactive "P") (byte-code "ÂˆÃ!ˆ	… Ä ˆdb‡" [*haskell-buffer* eob-p nil pop-to-buffer push-mark] 3))
+
+(defun haskell-command (str) "\
+Format STRING as a haskell command and send it to haskell process.  \\[haskell-command]" (interactive "sHaskell command: ") (byte-code "ÁˆÂÃÄH!=ƒ Å ‚# ÆÇP!ˆÈÉP!ˆÊÇËQ!‡" [str nil 81 capitalize 0 ci-quit haskell-begin-interaction "Executing command: :" haskell-send-command ":" haskell-end-interaction "  ...done."] 8))
+
+(defun haskell-eval nil "\
+Evaluate expression in current module. \\[haskell-eval]" (interactive) (byte-code "ÀˆÁ ˆÂÃÄ!ÀÅ#‡" [nil haskell-maybe-create-process haskell-eval-aux get-haskell-expression "Haskell expression: " "Evaluating"] 6))
+
+(defun haskell-run nil "\
+Run Haskell Dialogue in current module" (interactive) (byte-code "ÁˆÂ ˆÃÄÅ!ÀÆ#‡" [t nil haskell-maybe-create-process haskell-eval-aux get-haskell-expression "Haskell dialogue: " "Running"] 6))
+
+(defun haskell-run-main nil "\
+Run Dialogue named main in current module" (interactive) (byte-code "ÁˆÂ ˆÃÄÀÅ#‡" [t nil haskell-maybe-create-process haskell-eval-aux "main" "Running"] 5))
+
+(defun haskell-eval-aux (exp dialogue-p what) (byte-code "ÍÎ \"ƒ( 
+ÏÐ	#Ñ		
+&,‚¦ ÍÎ \"ƒV Ò Óp!Ô\"ÏÕ	#Ñ		
+&,‚¦ Ò ƒƒ Ò Óp!Ô\"ÏÖ×!	$Ñ		
+&,‚¦ Îp!Ø	!Ù	!ÏÚ		$Ñ		
+&,‡" [*haskell-buffer* pname *last-pad* mname *last-module* fname *last-loaded* msg what exp dialogue-p *ht-temp-buffer* t equal buffer-name format "%s: %s" haskell-eval-aux-aux buffer-file-name get-modname lookup-pad "%s (in tutorial): %s" "%s (in file %s): %s" file-name-nondirectory get-module-from-pad get-file-from-pad "%s (in pad %s): %s"] 29))
+
+(defun haskell-eval-aux-aux (exp pname mname fname msg dialogue-p) (byte-code "Æ!ˆÇ ˆÈ	!ˆÉ
+!ˆ… Ê!ˆƒ! Ë!‚$ Ì!ˆÍ ˆÎÏP!‡" [msg fname mname pname dialogue-p exp haskell-begin-interaction ci-kill haskell-load-file-if-modified ci-module haskell-save-pad-if-modified ci-send-name ci-print-exp ci-eval haskell-end-interaction "  ...done."] 11))
+
+(defun haskell-save-pad-if-modified (pad) (byte-code "ŠqˆÃ	\"† Ä …! ‰ˆÅ ˆÆ!ˆÇ!ˆÈ )‡" [pad haskell-main-pad *last-pad* equal buffer-modified-p ci-clear ci-set-file ci-send-buffer ci-save] 7))
+
+(defun haskell-run-file nil "\
+Run all Dialogues in current file" (interactive) (byte-code "ÂˆÃ ˆÄÅ \"ƒ ÆÇ!‚& È ƒ ÉÈ !‚& ÉÊÅp!!!‡" [*haskell-buffer* t nil haskell-maybe-create-process equal buffer-name call-interactively haskell-run-file/process buffer-file-name haskell-run-file-aux get-file-from-pad] 11))
+
+(defun haskell-run-file/process (filename) (interactive (byte-code "ÃÄ	Â$‡" [haskell-prev-l/c-dir/file haskell-source-modes t comint-get-source "Haskell file to run:  "] 5)) (byte-code "ÄˆÅ!ˆÆ!Ç!B‰ˆÈ!‡" [haskell-prev-l/c-dir/file haskell-source-modes t filename nil comint-check-source file-name-directory file-name-nondirectory haskell-run-file-aux] 5))
+
+(defun haskell-run-file-aux (fname) (byte-code "Ã	PÄ!ˆÅ ˆÆ
+!ˆÇÈ	!!ˆÉÊP!)‡" [msg fname buffer-file-name "Running file: " haskell-begin-interaction ci-kill save-modified-source-files ci-run strip-fext haskell-end-interaction "  ...done."] 8))
+
+(defun haskell-load nil "\
+Load current file" (interactive) (byte-code "ÃˆÄ ˆÅ ÆPƒ  Ç	!ˆÈ!ˆÉ	ÊP!‚# ËÌ!*‡" [fname msg t nil haskell-maybe-create-process buffer-file-name "Loading file: " haskell-begin-interaction haskell-load-file-if-modified haskell-end-interaction "  ...done." haskell-mode-error "Must be in a file to load"] 7))
+
+(defun haskell-load-file-if-modified (filename) (byte-code "Å!ˆÆ	
+\"ƒ 
+‰ˆÇ ‚ 	‰ˆÈÉ	!!‡" [buffer-file-name filename haskell-main-file *last-loaded* t save-modified-source-files string= ci-load-main ci-load strip-fext] 6))
+
+(defun haskell-compile nil "\
+Compile current file" (interactive) (byte-code "ÂˆÃ ˆÄ ƒ ÅÆP!ˆÇ!ˆÈÆÉQ!‚\" ÊË!)‡" [fname t nil haskell-maybe-create-process buffer-file-name haskell-begin-interaction "Compiling: " haskell-compile-file-if-modified haskell-end-interaction "  ...done." haskell-mode-error "Must be in a file to compile"] 8))
+
+(defun haskell-compile-file-if-modified (fname) (byte-code "Â!ˆÃÄ	!!‡" [buffer-file-name fname save-modified-source-files ci-compile strip-fext] 4))
+
+(defun haskell-exit nil "\
+Quit the haskell process" (interactive) (byte-code "ÁˆÃ ˆ… Ä!… ŠqˆÅÁ!)ˆÆ
+!ˆÇ
+!‡" [*ht-temp-buffer* nil *haskell-buffer* ci-quit get-buffer set-buffer-modified-p bury-buffer replace-buffer-in-windows] 6))
+
+(defun haskell-interrupt nil "\
+Interrupt the haskell process" (interactive) (byte-code "ÀˆÁÂ!ˆÃÄ!‡" [nil haskell-send-command-aux "" haskell-end-interaction "done."] 3))
+
+(defun haskell-edit-unit nil "\
+Edit the .hu file." (interactive) (byte-code "ÃˆÅ ƒ1 ÆCÃÇ È!ˆ
+…- ÉÊË!Ë!\"ƒ+ Ì!‚, !+‚4 ÍÎ!)‡" [fname find-file-not-found-hooks file-not-found nil units-fname buffer-file-name haskell-new-unit haskell-get-unit-file find-file-other-window units-add-source-file string= file-name-directory file-name-nondirectory haskell-mode-error "Not in a .hs buffer"] 10))
+
+(defun haskell-new-unit nil (byte-code "Á‰‡" [file-not-found t] 2))
+
+(defun units-add-source-file (file) (byte-code "ŠÁÂ!Ã\")‡" [file insert strip-fext "
+"] 4))
+
+(defun haskell-get-unit-file nil (byte-code "ÁŠÄ ˆÅÆdÂ#ƒ ÇÈ!É ˆÊ`\"‰)‚' ËÌ !ÍP‰)ˆ)‡" [name nil t beg beginning-of-buffer re-search-forward "-- unit:[ 	]*" match-end 0 end-of-line buffer-substring strip-fext buffer-file-name ".hu"] 9))
+
+(defun haskell-please-recover nil (interactive) (byte-code "ÀˆÁ ˆÂÃ!‡" [nil haskell-flush-commands-and-reset haskell-end-interaction "done."] 3))
+
+(defvar haskell-menu-mode-map nil "\
+")
+
+(if (not haskell-menu-mode-map) (progn (setq haskell-menu-mode-map (make-keymap)) (suppress-keymap haskell-menu-mode-map t) (define-key haskell-menu-mode-map "m" (quote haskell-menu-mark)) (define-key haskell-menu-mode-map "u" (quote haskell-menu-unmark)) (define-key haskell-menu-mode-map "x" (quote haskell-menu-exit)) (define-key haskell-menu-mode-map "q" (quote haskell-menu-exit)) (define-key haskell-menu-mode-map " " (quote next-line)) (define-key haskell-menu-mode-map "" (quote haskell-menu-backup-unmark)) (define-key haskell-menu-mode-map "?" (quote describe-mode))))
+
+(put (quote haskell-menu-mode) (quote mode-class) (quote special))
+
+(defun haskell-menu-mode nil "\
+Major mode for editing Haskell flags.
+Each line describes a flag.
+Letters do not insert themselves; instead, they are commands.
+m -- mark flag (turn it on)
+u -- unmark flag (turn it off)
+x -- exit; tell the Haskell process to update the flags, then leave menu.
+q -- exit; same as x.
+Precisely,\\{haskell-menu-mode-map}" (byte-code "Æ ˆÇ!ˆÂ‰ˆÂ‰ˆÈ‰ˆÉ‰ˆÊË!ˆÊÌ!ˆÊÍ!ˆÎÏ!‡" [haskell-menu-mode-map truncate-lines t buffer-read-only major-mode mode-name kill-all-local-variables use-local-map haskell-menu-mode "Haskell Flags Menu" make-local-variable haskell-menu-current-flags haskell-menu-request-fn haskell-menu-update-fn run-hooks haskell-menu-mode-hook] 7))
+
+(defun haskell-menu (help-file buffer request-fn update-fn) (byte-code "Æ ˆÇ!ƒ È!ˆeb‚$ È!ˆÉ	!ˆÊ ˆ‰ˆ‰ˆË ˆÌÍ!‡" [buffer help-file haskell-menu-request-fn request-fn haskell-menu-update-fn update-fn haskell-maybe-create-process get-buffer pop-to-buffer insert-file-contents haskell-menu-mode haskell-menu-mark-current message "m = mark; u = unmark; x = execute; q = quit; ? = more help."] 9))
+
+(defvar *haskell-menu-marked* " on")
+
+(defvar *haskell-menu-unmarked* "   ")
+
+(defvar *haskell-menu-marked-regexp* " on   \\w")
+
+(defvar *haskell-menu-unmarked-regexp* "      \\w")
+
+(defun haskell-menu-mark nil "\
+Mark flag to be turned on." (interactive) (byte-code "ÃˆÇ ˆÈ!ƒ ÉÊ!‚+ È	!ƒ( ÃËG!ˆcˆÉÊ!)‚+ ÉÊ!‡" [*haskell-menu-marked-regexp* *haskell-menu-unmarked-regexp* buffer-read-only nil *haskell-menu-unmarked* *haskell-menu-marked* t beginning-of-line looking-at forward-line 1 delete-char] 8))
+
+(defun haskell-menu-unmark nil "\
+Unmark flag." (interactive) (byte-code "ÃˆÇ ˆÈ!ƒ ÉÊ!‚+ È	!ƒ( ÃËG!ˆcˆÉÊ!)‚+ ÉÊ!‡" [*haskell-menu-unmarked-regexp* *haskell-menu-marked-regexp* buffer-read-only nil *haskell-menu-marked* *haskell-menu-unmarked* t beginning-of-line looking-at forward-line 1 delete-char] 8))
+
+(defun haskell-menu-backup-unmark nil "\
+Move up and unmark." (interactive) (byte-code "ÀˆÁÂ!ˆÃ ˆÁÂ!‡" [nil forward-line -1 haskell-menu-unmark] 4))
+
+(defun haskell-menu-exit nil "\
+Update flags, then leave menu." (interactive) (byte-code "ÀˆÁ ˆÂ ‡" [nil haskell-menu-execute haskell-menu-quit] 3))
+
+(defun haskell-menu-execute nil "\
+Tell haskell process to tweak flags." (interactive) (byte-code "ÂˆÅ ˆŠebˆ`d=?…7 Æ!ƒ Ç	È Â#‚/ Æ!ƒ. Ç	È Ä#‚/ ÂˆÉÊ!ˆ‚	 )ˆË ‡" [*haskell-menu-unmarked-regexp* haskell-menu-update-fn nil *haskell-menu-marked-regexp* t start-setting-flags looking-at funcall haskell-menu-flag forward-line 1 finish-setting-flags] 11))
+
+(defun haskell-menu-quit nil (interactive) (byte-code "ÀˆÁˆÂp!ˆÃp!‡" [nil "Make the menu go away." bury-buffer replace-buffer-in-windows] 3))
+
+(defun haskell-menu-flag nil (byte-code "ŠÁ ˆÂÃ!ˆ`ÄÅ!ˆÆÇÈ!\"))‡" [beg beginning-of-line forward-char 6 re-search-forward "	\\|  " buffer-substring match-beginning 0] 7))
+
+(defun start-setting-flags nil (byte-code "À‡" [nil] 1))
+
+(defun finish-setting-flags nil (byte-code "ÀÁ!‡" [haskell-end-interaction "Setting flags....done."] 2))
+
+(defun haskell-menu-mark-current nil (byte-code "Ä!ˆŠebˆ`d=?…; Å	!… ÆÇ !ƒ! È ‚7 Å
+!…, ÆÇ !?ƒ4 É ‚7 ÊË!ˆ‚ )‡" [haskell-menu-request-fn *haskell-menu-unmarked-regexp* *haskell-menu-marked-regexp* t funcall looking-at menu-item-currently-on-p haskell-menu-flag haskell-menu-mark haskell-menu-unmark forward-line 1] 12))
+
+(defun menu-item-currently-on-p (item) (byte-code "Â	\"‡" [item haskell-menu-current-flags member-string=] 3))
+
+(defun member-string= (item list) (byte-code "?ƒ	 Á‚ Ä
+@\"ƒ ‚ Å
+A\"‡" [list nil item t string= member-string=] 4))
+
+(defvar *haskell-printers-help* (concat (getenv "HASKELL") "/emacs-tools/printer-help.txt") "\
+Help file for printers.")
+
+(defvar *haskell-printers-buffer* "*Haskell printers*")
+
+(defun haskell-printers nil "\
+Set printers interactively." (interactive) (byte-code "ÂˆÃ	ÄÅ$‡" [*haskell-printers-help* *haskell-printers-buffer* nil haskell-menu get-current-printers set-current-printers] 5))
+
+(defun get-current-printers nil (byte-code "Á‰ˆÂÃ!ˆÁ=… ÄÅ!ˆ‚ ‡" [haskell-menu-current-flags t haskell-send-command ":p?" sleep-for 1] 4))
+
+(defun update-printers-list (data) (byte-code "Â	!‰‡" [haskell-menu-current-flags data read] 3))
+
+(defun set-current-printers (flag on) (byte-code "Å	!
+…
+ ?ƒ ÆÇÈ	\"!‚) 
+?… ƒ( ÆÇÉ	\"!‚) Ä)‡" [was-on flag on t nil menu-item-currently-on-p haskell-send-command format ":p+ %s" ":p- %s"] 7))
+
+(defvar *haskell-optimizers-help* (concat (getenv "HASKELL") "/emacs-tools/optimizer-help.txt") "\
+Help file for optimizers.")
+
+(defvar *haskell-optimizers-buffer* "*Haskell optimizers*")
+
+(defun haskell-optimizers nil "\
+Set optimizers interactively." (interactive) (byte-code "ÂˆÃ	ÄÅ$‡" [*haskell-optimizers-help* *haskell-optimizers-buffer* nil haskell-menu get-current-optimizers set-current-optimizers] 5))
+
+(defun get-current-optimizers nil (byte-code "Á‰ˆÂÃ!ˆÁ=… ÄÅ!ˆ‚ ‡" [haskell-menu-current-flags t haskell-send-command ":o?" sleep-for 1] 4))
+
+(defun update-optimizers-list (data) (byte-code "Â	!‰‡" [haskell-menu-current-flags data read] 3))
+
+(defun set-current-optimizers (flag on) (byte-code "Å	!
+…
+ ?ƒ ÆÇÈ	\"!‚) 
+?… ƒ( ÆÇÉ	\"!‚) Ä)‡" [was-on flag on t nil menu-item-currently-on-p haskell-send-command format ":o+ %s" ":o- %s"] 7))
+
+(defvar *pad-mappings* nil "\
+Associates pads with their corresponding module and file.")
+
+(defun record-pad-mapping (pname mname fname) (byte-code "	
+EB‰‡" [*pad-mappings* pname mname fname] 3))
+
+(defun get-module-from-pad (pname) (byte-code "Â	\"A@‡" [pname *pad-mappings* assoc] 3))
+
+(defun get-file-from-pad (pname) (byte-code "Â	\"AA@‡" [pname *pad-mappings* assoc] 3))
+
+(defun lookup-pad (mname fname) (byte-code "Ã	
+#‡" [mname fname *pad-mappings* lookup-pad-aux] 4))
+
+(defun lookup-pad-aux (mname fname list) (byte-code "?ƒ	 Á‚* Å
+@A@\"… Å@AA@\"ƒ$ @@‚* Æ
+A#‡" [list nil mname fname t equal lookup-pad-aux] 6))
+
+(defvar *ask-before-saving* t)
+
+(defun save-modified-source-files (filename) (byte-code "È Â…O @É!…; Šqˆ…: Ê!…: Å‰…: ?†: Ë\"†: ÌÍÎ\"!)…E ŠqˆÏ ))ˆA‰ˆ‚ ˆ	ƒZ ÐÑ!‚] ÐÒ!*‡" [buffers found-any nil buffer buffer-file-name t *ask-before-saving* filename buffer-list buffer-modified-p source-file-p string= y-or-n-p format "Save file %s? " save-buffer message "" "(No files need saving)"] 10))
+
+(defun source-file-p (filename) (byte-code "ÁÂ\"†' ÁÃ\"†' ÁÄ\"†' ÁÅ\"†' ÁÆ\"†' ÁÇ\"‡" [filename string-match "\\.hs$" "\\.lhs$" "\\.hu$" "\\.shu$" "\\.hsp$" "\\.prim$"] 8))
+
+(defun haskell-move-marker nil "\
+Moves the marker and point to the end of buffer" (byte-code "Ád\"ˆÁÂÃÄ!!d\"ˆdb‡" [comint-last-input-end set-marker process-mark get-process "haskell"] 6))
+
+(defun create-main-pad nil (byte-code "Ä	!ŠqˆÅ )ˆÆ	
+#ˆ)‡" [buffer haskell-main-pad haskell-main-module haskell-main-file get-buffer-create haskell-mode record-pad-mapping] 6))
+
+(defvar *re-module* "^module\\s *\\|^>\\s *module\\s *")
+
+(defvar *re-modname* "[A-Z]\\([a-z]\\|[A-Z]\\|[0-9]\\|'\\|_\\)*")
+
+(defun get-modname (buff) "\
+Get module name in BUFFER that point is in." (byte-code "ŠqˆÄ	!† Å	eÂ#† Æ	dÂ#ƒ6 ÇÈ!bˆÄ!ƒ0 ÉÊÈ!ÇÈ!\"‚3 ËÌ!‚7 Í)‡" [buff *re-module* t *re-modname* looking-at re-search-backward re-search-forward match-end 0 buffer-substring match-beginning haskell-mode-error "Module name not found!!" "Main"] 10))
+
+(defun get-padname (m) "\
+Build padname from module name" (byte-code "ÁÂQ‡" [m "*" "-pad*"] 3))
+
+(defvar *haskell-filename-regexp* "\\(.*\\)\\.\\(hs\\|lhs\\)$")
+
+(defun strip-fext (filename) "\
+Strip off the extension from a filename." (byte-code "Â	\"ƒ 	ÃÄ!ÅÄ!O‚ 	‡" [*haskell-filename-regexp* filename string-match match-beginning 1 match-end] 6))
+
+(defun haskell-mode-error (msg) "\
+Show MSG in message line as an error from the haskell mode" (byte-code "ÁÂP!‡" [msg error "Haskell mode:  "] 3))
+
+(defun ci-send-buffer (buff) "\
+Send BUFFER to haskell process." (byte-code "Â ÃÄ\"?… Š	qˆÅ!))‡" [str buff buffer-string string-match "\\`\\s *\\'" haskell-send-command] 4))
+
+(defun ci-kill nil (byte-code "ÀÁ!‡" [haskell-send-command ":kill"] 2))
+
+(defun ci-clear nil (byte-code "ÀÁ!‡" [haskell-send-command ":clear"] 2))
+
+(defun ci-set-file (file-name) (byte-code "ÁÂP!‡" [file-name haskell-send-command ":file "] 3))
+
+(defun ci-module (modname) (byte-code "	‰ˆÂÃ	P!‡" [*last-module* modname haskell-send-command ":module "] 3))
+
+(defun ci-load (filename) (byte-code "ÁÂP!‡" [filename haskell-send-command ":load "] 3))
+
+(defun ci-load-main nil (byte-code "ÀÁ!‡" [haskell-send-command ":Main"] 2))
+
+(defun ci-save nil (byte-code "ÀÁ!‡" [haskell-send-command ":save"] 2))
+
+(defun ci-compile (filename) (byte-code "ÁÂP!‡" [filename haskell-send-command ":compile "] 3))
+
+(defun ci-run (filename) (byte-code "ÁÂP!‡" [filename haskell-send-command ":run "] 3))
+
+(defun ci-print-exp (exp) (byte-code "ÁÂ!ˆÃÄP!‡" [exp ci-set-file "interactive-expression-buffer" haskell-send-command "= "] 4))
+
+(defun ci-send-name (name) (byte-code "ÂÃ!ÄÅ!ˆÆÇ	Q!)‡" [temp name make-temp-name "etemp" ci-set-file "interactive-expression-buffer" haskell-send-command " = "] 6))
+
+(defun ci-eval nil (byte-code "ÀÁ!‡" [haskell-send-command ":eval"] 2))
+
+(defun ci-quit nil (byte-code "Ã!?ƒ ÄÅ!‚ ÆÇ!ƒ ÈÉÊ\"ˆËÌ!‚ Â‡" [*haskell-buffer* t nil get-buffer-process message "No process currently running." y-or-n-p "Do you really want to quit Haskell? " process-send-string "haskell" ":quit
+" set-haskell-status dead] 6))
+
+(defun ci-emacs nil (byte-code "À ˆÁÂÃ!Ä\"ˆÅÆ!‡" [haskell-reset set-process-filter get-process "haskell" process-haskell-output haskell-send-command ":Emacs on"] 5))
+
+(defun haskell-get-old-input nil "\
+Get old input text from Haskell process buffer." (byte-code "ŠÃdÄ#… ÅÆ!bˆÇeÁ#…# È ˆ`É ˆÊ
+`\"))‡" [haskell-prompt-pattern t temp re-search-forward move match-beginning 0 re-search-backward comint-skip-prompt end-of-line buffer-substring] 8))
+
+(defun haskell-send-input nil "\
+Send input to Haskell while in the process buffer" (interactive) (byte-code "Áˆƒ Â ‚ Ã ‡" [*emacs* nil haskell-send-input-aux comint-send-input] 3))
+
+(defun haskell-send-input-aux nil (byte-code "Êp!?ƒ ËÌ!‚Y Í!Î	!`
+Yƒ$ Ï	`\"‚0 Ð!	bˆcˆ)ÑcˆÐ\"…A Ò\"ˆÐ\"ˆÓÍ!`\"ˆÓ	`\"ˆÔ!+)‡" [proc pmark pmark-val input copy comint-get-old-input comint-input-filter input-ring comint-input-sentinel comint-last-input-end get-buffer-process haskell-mode-error "Current buffer has no process" process-mark marker-position buffer-substring funcall 10 ring-insert set-marker haskell-send-data] 14))
+
+(defvar haskell-minibuffer-local-map nil "\
+Local map for minibuffer when in Haskell")
+
+(if haskell-minibuffer-local-map nil (progn (setq haskell-minibuffer-local-map (full-copy-sparse-keymap minibuffer-local-map)) (define-key haskell-minibuffer-local-map "p" (quote haskell-previous-input)) (define-key haskell-minibuffer-local-map "n" (quote haskell-next-input))))
+
+(defun haskell-previous-input (arg) "\
+Cycle backwards through input history." (interactive "*p") (byte-code "ÇˆÈ	!ÉXƒ ÊË!ˆÌ ‚V Í=ƒ' ÎÏ `\"ˆÐ`!‚B ÉVƒ1 Ñ‚< ÉWƒ; Ò‚< É‰ˆÓ`!ˆÔ\\\"‰ˆÕ	\"cˆÍ‰)‡" [len haskell-prompt-ring t last-command input-ring-index arg this-command nil ring-length 0 message "Empty input ring" ding haskell-previous-input delete-region mark set-mark -1 1 push-mark comint-mod ring-ref] 11))
+
+(defun haskell-next-input (arg) "\
+Cycle forwards through input history." (interactive "*p") (byte-code "ÁˆÂ[!‡" [arg nil haskell-previous-input] 2))
+
+(defvar haskell-last-input-match "" "\
+Last string searched for by Haskell input history search, for defaulting.
+Buffer local variable.")
+
+(defun haskell-previous-input-matching (str) "\
+Searches backwards through input history for substring match" (interactive (byte-code "ÂÃÄ	\"!ÅÆ\"ƒ 	‚ C)‡" [s haskell-last-input-match read-from-minibuffer format "Command substring (default %s): " string= ""] 5)) (byte-code "Çˆ
+‰ˆÈ
+!É!ÊX… Ë
+Ì\"\"?…* Í\\‰ˆ‚ ˆXƒ9 ÎÍ\\!‚< ÏÐ!+‡" [s haskell-last-input-match str len haskell-prompt-ring n t nil regexp-quote ring-length 0 string-match ring-ref 1 haskell-previous-input haskell-mode-error "Not found."] 7))
+
+(defun get-haskell-expression (prompt) (byte-code "Å	Â#Æ\"ˆ)‡" [exp prompt nil haskell-minibuffer-local-map haskell-prompt-ring read-from-minibuffer ring-insert] 4))
+
+(defvar haskell-load-hook nil "\
+This hook is run when haskell is loaded in.
+This is a good place to put key bindings.")
+
+(run-hooks (quote haskell-load-hook))
+
+(defvar ht-mode-map nil)
+
+(if ht-mode-map nil (progn (setq ht-mode-map (make-sparse-keymap)) (haskell-establish-key-bindings ht-mode-map) (define-key ht-mode-map "" (quote ht-next-page)) (define-key ht-mode-map "" (quote ht-prev-page)) (define-key ht-mode-map "" (quote ht-restore-page)) (define-key ht-mode-map "?" (quote describe-mode))))
+
+(defun haskell-tutorial-mode nil "\
+Major mode for running the Haskell tutorial.  
+You can use these commands:
+\\{ht-mode-map}" (interactive) (byte-code "ÄˆÅ ˆÆ!ˆÇ‰ˆÈ‰ˆÉ!ˆÊË!‡" [ht-mode-map major-mode mode-name haskell-mode-syntax-table nil kill-all-local-variables use-local-map haskell-tutorial-mode "Haskell Tutorial" set-syntax-table run-hooks haskell-mode-hook] 5))
+
+(defun haskell-tutorial nil "\
+Run the haskell tutorial." (interactive) (byte-code "ÀˆÁ ˆÂ ˆÃ ‡" [nil ht-load-tutorial ht-make-buffer ht-display-page] 4))
+
+(defun ht-load-tutorial nil (byte-code "Ä	!ƒ ŠqˆÅ )‚/ ŠÆ	!‰qˆÇ!È
+!ƒ* É
+!‚- ÊÉ!)))‡" [buffer *ht-file-buffer* fname *ht-source-file* get-buffer beginning-of-buffer get-buffer-create substitute-in-file-name file-readable-p ht-load-tutorial-aux call-interactively] 8))
+
+(defun ht-load-tutorial-aux (filename) (interactive "fTutorial file: ") (byte-code "ÁˆÄ!ˆÅÁ!ˆÃ‰ˆÆ ‡" [filename nil buffer-read-only t insert-file set-buffer-modified-p beginning-of-buffer] 4))
+
+(defun ht-make-buffer nil (byte-code "ÁÂÃÄ!ÅQ!ˆÆ ‰ˆÇ ‡" [*ht-temp-buffer* find-file "/tmp/" make-temp-name "ht" ".hs" buffer-name haskell-tutorial-mode] 5))
+
+(defun ht-next-page nil "\
+Go to the next tutorial page." (interactive) (byte-code "ÀˆÁ ƒ Â ‚ Ã ‡" [nil ht-goto-next-page ht-display-page beep] 4))
+
+(defun ht-goto-next-page nil (byte-code "pÄŽ	qˆÅÆÂÃ#))‡" [buff *ht-file-buffer* nil t ((byte-code "q‡" [buff] 1)) search-forward ""] 4))
+
+(defun ht-prev-page nil "\
+Go to the previous tutorial page." (interactive) (byte-code "ÀˆÁ ƒ Â ‚ Ã ‡" [nil ht-goto-prev-page ht-display-page beep] 4))
+
+(defun ht-goto-prev-page nil (byte-code "pÄŽ	qˆÅÆÂÃ#))‡" [buff *ht-file-buffer* nil t ((byte-code "q‡" [buff] 1)) search-backward ""] 4))
+
+(defun ht-goto-page (arg) "\
+Go to the tutorial page specified as the argument." (interactive "sGo to page: ") (byte-code "ÁˆÂÃÄ\"!ƒ Å ‚ Æ ‡" [arg nil ht-searchfor-page format "-- Page %s " ht-display-page beep] 5))
+
+(defun ht-goto-section (arg) "\
+Go to the tutorial section specified as the argument." (interactive "sGo to section: ") (byte-code "ÁˆÂÃÄ\"!ƒ Å ‚ Æ ‡" [arg nil ht-searchfor-page format "-- Section %s " ht-display-page beep] 5))
+
+(defun ht-searchfor-page (search-string) (byte-code "pÆŽ	qˆ`Ç ˆÈÄÅ#ƒ Å‚ 
+bˆÄ)))‡" [buff *ht-file-buffer* point search-string nil t ((byte-code "q‡" [buff] 1)) beginning-of-buffer search-forward] 5))
+
+(defun ht-restore-page nil (interactive) (byte-code "Áˆ`Â ˆb)‡" [old-point nil ht-display-page] 2))
+
+(defun ht-display-page nil (byte-code "qˆÇÈÂÃ#ƒ ÉÊ!‚ Ë ˆ`ÌÈÂÃ#ƒ# Í ‚% Î ˆ`Ï	\"qˆÐ ˆcˆË +‡" [*ht-file-buffer* beg nil t end text *ht-temp-buffer* search-backward "" forward-line 1 beginning-of-buffer search-forward beginning-of-line end-of-buffer buffer-substring erase-buffer] 10))

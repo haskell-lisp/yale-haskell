@@ -1,0 +1,12 @@
+
+This is the text of the online version of the tutorial.  It is set up to
+run under Emacs only.  Form feeds divide the pages of the tutorial.  Emacs
+has a special mode just for the tutorial which makes a local copy of each
+page for the user to scribble on without disturbing this source.
+
+It is possible that this could be adapted to the command interface by
+breaking it up into one file per page.
+
+This is still preliminary - we need to work on the text and examples.
+Please send comments to haskell-request@cs.yale.edu.
+

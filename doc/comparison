@@ -1,0 +1,291 @@
+
+         Different Versions of Yale Haskell Compared
+         -------------------------------------------
+
+
+There are currently three different platforms running Yale Haskell.
+Yale Haskell runs on Lucid Common Lisp, CMU Common Lisp, and AKCL.  This
+document describes the differences between these systems.
+
+Differences in performance between the different versions of Yale
+Haskell reflect the underlying Lisp systems.  The better the Lisp
+system, the better the Haskell system built on it.  However, getting
+optimal performance from our Haskell system on top of a Common Lisp
+system requires careful attention to the underlying compiler.  Small
+changes in the optimization settings or the addition of crucial
+declarations can make significant differences in performance.  We have
+been doing most of our work using the Lucid system and have tuned it
+more than the others.  These comparisons are greatly influenced by the
+amount of time we have spent tuning the system: the CMU version has
+been tuned only a little and the AKCL version hardly at all.
+
+
+  Methodology
+
+The following timings are only approximate.  They were obtained using
+the timing functions provided by the Common Lisp system.  All timings
+were done on an unloaded Sparc 1.  No attempt was made to account for
+garbage collection, differences in heap size, or similar factors.  We
+don't intend these benchmark results to be taken as an exhaustive
+comparison of the different Lisp implementations involved.
+
+
+  Portability
+
+We have had no trouble moving our system to different hardware
+platforms under the same Lisp system.  Since the release is in source
+form, we expect that users will be able to build on any hardware
+platform supported by one the Lisps we have ported to.  Probably the
+only real constraint on portability is the requirement for a large
+virtual memory space.  
+
+From the comp.lang.lisp FAQ:
+
+  Lucid Common Lisp runs on a variety of platforms, including PCs (AIX),
+  Apollo, HP, Sun-3, Sparc, IBM RT, IBM RS/6000, Decstation 3100,
+  Silicon Graphics, and Vax.
+
+  CMU Common Lisp is free, and runs on Sparcs (Mach and SunOs),
+  DecStation 3100 (Mach), IBM RT (Mach) and requires 16mb RAM, 25mb disk.
+
+  Kyoto Common Lisp (KCL) is free, but requires a license. Conforms to CLtL1.
+  It is available by anonymous ftp from rascal.ics.utexas.edu [128.83.138.20],
+  cli.com [192.31.85.1], or [133.11.11.11] (a machine in Japan)
+  in the directory /pub.  AKCL is in the file akcl-xxx.tar.Z (take the
+  highest value of xxx).  To obtain KCL, one  must first sign and mail a
+  copy of the license agreement to: Special Interest Group in LISP,
+  c/o Taiichi Yuasa, Department of Computer Science,  Toyohashi
+  University of Technology, Toyohashi 441, JAPAN. Runs on Sparc,
+  IBM RT, RS/6000, DecStation 3100, hp300, hp800, Macintosh II (under AUX),
+  mp386, IBM PS2, Silicon Graphics 4d, Sun3, Sun4, Sequent Symmetry,
+  IBM 370, NeXT and Vax. A port to DOS is in beta test as
+  math.utexas.edu:pub/beta2.zip.
+
+We have not yet completed ports of Yale Haskell to any other Lisp
+implementations, although we are likely to do so in the future.
+
+
+ System Size
+
+The overall size of the Haskell system depends on the size of the
+underlying Lisp system and how much unnecessary Lisp overhead has been
+removed for the system.  We have removed large Lisp packages (like
+CLOS or CLX), but have not attempted to do any tree shaking.  The size
+of the saved images (including the Lisp system, the Haskell compiler,
+and the compiled prelude) is
+
+Image Size:
+
+Lucid   10 meg
+CMU     18 meg
+AKCL    11 meg
+
+The larger size of the CMU system is probably an artifact of their way
+of saving the system.
+
+
+  Compilation Time
+
+There are three possible ways to compile a Haskell program.  All
+Haskell programs must be translated into Lisp.  The generated Lisp can
+then be interpreted, using no additional compilation time; compiled
+with a `fast' but nonoptimizing Lisp compiler; or compiled with the
+`slow' compiler that aggressively attempts to perform as many
+optimizations as possible.  
+
+To time the `fast', nonoptimizing compiler, we have been using
+
+(PROCLAIM '(OPTIMIZE (SPEED 3) (SAFETY 0) (COMPILATION-SPEED 3)))
+
+and for the `slow', fully optimizing compiler, we have been using
+
+(PROCLAIM '(OPTIMIZE (SPEED 3) (SAFETY 0) (COMPILATION-SPEED 0)))
+
+so that the only difference is in the COMPILATION-SPEED quality.
+Lucid does, in fact, provide two completely different compilers that
+correspond to these optimize settings.  For all three implementations,
+it appears that that the effect of a higher compilation speed setting
+is primarily in being less aggressive about inlining and making use of
+type declarations.
+
+The Haskell system itself (including the Prelude) is normally built
+with the fully optimizing compiler.
+
+To show just the Haskell to Lisp compilation time, here are the times
+needed to compile the Prelude (about 2500 lines of Haskell code).
+This does not include the time in the Lisp compiler or starting up the
+system.
+
+Time to compile the Prelude into Lisp: (CPU times)
+
+Lucid     111 sec
+CMU       87  sec
+AKCL      576 sec
+
+Running the Lisp compiler on the generated code takes far longer than
+running the Haskell compiler to produce the Lisp code.  For example,
+the optimizing Lucid compiler takes 47 minutes to compile the Prelude
+(about x20 slower than Haskell -> Lisp).  The nonoptimizing compiler
+is significantly faster but generates poorer code.
+
+The following times are the Lisp compilation time for the Prolog
+interpreter (found in the demo directory of our release):
+
+Lucid - interpreted     8.8 sec  Haskell -> Lisp
+Lucid - nonopt         20.0 sec  Lisp -> Machine code
+Lucid - optimizing    320.0 sec  Lisp -> Machine code
+CMU - interpreted      12.4 sec  Haskell -> Lisp
+CMU - nonopt          121.0 sec  Lisp -> Machine code
+CMU - optimizing      152.8 sec  Lisp -> Machine code
+AKCL - interpreted     47.8 sec  Haskell -> Lisp
+AKCL - nonopt          ~180 sec  Lisp -> Machine code
+AKCL - optimizing      ~360 sec  Lisp -> Machine code
+
+The AKCL timings are only approximate, because the Lisp timing
+functions do not capture the time spent in the C compiler.
+
+
+Code Speed
+
+The speed of the Haskell program depends on whether the Lisp code
+has been compiled with the optimizing or nonoptimizing compiler, or
+is running interpretively.
+
+The first benchmark is nfib, which indicates the basic speed of
+function calling and Int arithmetic.
+
+module Main where
+
+nfib :: Int -> Int
+nfib 0 = 1
+nfib 1 = 1
+nfib n = nfib (n-1) + nfib (n-2)
+
+
+                             nfib 20            nfib 30    
+Lucid (Interpreted)          116 sec            *
+Lucid (nonopt)               0.14 sec           9.4 sec
+Lucid (optimizing)           0.08 sec           4.8 sec
+CMU (Interpreted)            23.8 sec           *
+CMU (nonopt)                 0.24 sec           6.9 sec
+CMU (optimizing)             0.11 sec           7.0 sec
+AKCL (Interpreted)           141 sec            *
+AKCL (nonopt)                0.20 sec           21.3 sec
+AKCL (optimizing)            0.15 sec           18.2 sec
+
+* Too slow to benchmark
+
+For other data types, there was no significant difference betwen
+optimizing and nonoptimizing compilation in any of the systems.
+Changing the signature of nfib to Integer -> Integer:
+
+                             nfib 20            nfib 30    
+Lucid (interpreted)          140 sec            *
+Lucid (compiled)             0.18 sec           10.2 sec
+CMU (interpreted)            24.2 sec           *
+CMU (compiled)               0.16 sec           10.5 sec
+AKCL (interpreted)           145 sec            *
+AKCL (compiled)              1.07 sec           127 sec
+
+Nfib with signature Float -> Float:
+
+                             nfib 20            nfib 30    
+Lucid (interpreted)          222  sec            *
+Lucid (compiled)             16.4 sec           2416 sec
+CMU (interpreted)            44.2 sec           *
+CMU (compiled)               1.61 sec           352 sec
+AKCL (interpreted)           161 sec            *
+AKCL (compiled)              103 sec            *
+
+Overloaded functions run considerably slower than nonoverloaded
+functions.  By allowing nfib to remain overloaded, Num a => a -> a,
+and using the Int overloading the same benchmarks run much slower.
+Again, there is no real difference between the different compiler
+optimization settings.
+
+                             nfib 15            nfib 20    
+Lucid (interpreted)          14.2 sec           156 sec
+Lucid (compiled)             0.97 sec           9.3 sec
+CMU (interpreted)            23.8 sec           155 sec
+CMU (compiled)               0.89 sec           15.6 sec
+AKCL (interpreted)           30.8 sec           387 sec
+AKCL (compiled)              10.3 sec           119 sec
+
+Basic Haskell data structuring operations (pattern matching and
+construction) can be tested using another version of nfib which uses
+natural numbers:
+
+  data Nat = Z | S Nat
+
+The difference betwen CMU and Lucid here is consistent with other
+benchmarks that manipulate structures.
+
+                             nfib 10            nfib 15
+Lucid (Interpreted)          1.39 sec           26.7 sec
+Lucid (compiled)             0.26 sec           2.28 sec
+CMU (interpreted)            3.1 sec            <stack overflow>
+CMU (compiled)               0.16 sec           0.54 sec
+AKCL (Interpreted)           4.25 sec           <stack overflow>
+AKCL (compiled)              0.21 sec           13.9 sec
+
+
+ A Large Program
+
+For a final benchmark, we use the Prolog interpreter as a way of
+getting a feel for general performance of larger programs.  This
+program is typical of symbolic (as opposed to numeric) computation.
+
+Time to solve append(X,Y,cons(a,cons(b,cons(c,nil)))):
+
+Lucid    12.2 sec
+CMU      12.0 sec
+AKCL     69.1 sec
+
+My interpretation of this result is that although Lucid is a bit
+slower on the previous small benchmarks, it makes up for this is
+larger programs where advantages like better instruction scheduling,
+register allocation, or memory usage may make a difference.  In
+general, Lucid and CMU are very similar in performance for larger
+programs.
+
+
+ Conclusions
+
+Briefly stated, the pluses and minuses of each system are as follows:
+
+Lucid (4.0.0):
+ + Development (nonoptimizing) compiler is very fast
+ + Fast Haskell -> Lisp compilation
+ + Generates good code
+ + Very robust
+ - Costs money
+ - Slow floating point code
+ - Fairly slow interpreter
+ - The production (optimizing) compiler is extremely slow.
+
+CMU (16e):
+ + Free
+ + As fast as Lucid for Haskell -> Lisp
+ + Good floating point performance
+ + Generated code is very fast
+ + Fast interpreter
+ - Slow Lisp -> machine code compilation
+ - Doesn't run on many systems
+
+AKCL (1.615):
+ + Free
+ + Widely portable
+ - Slow (generally 3 - 5 times slower, sometimes much worse)
+ - Flakey (tends to core dump on errors, choke on large programs, etc.)
+
+Generally, using the fully optimizing compiler seems to be useful only
+in code involving Int arithmetic.
+
+The fast compiler for Lucid is a big advantage, delivering by far the
+fastest compilation to machine code with relatively little loss in
+speed compared to the optimizing compiler.
+
+
+            Yale Haskell Group
+            September 25, 1992
+

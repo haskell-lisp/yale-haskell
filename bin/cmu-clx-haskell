@@ -1,0 +1,9 @@
+#!/bin/csh
+#
+# run cmu clx haskell
+
+if (`arch -k` == "sun4c") then
+  $CMUCLBIN -core $HASKELL/bin/sun4c-clx-haskell.core
+else
+  $CMUCLBIN -core $HASKELL/bin/sun4m-clx-haskell.core
+endif

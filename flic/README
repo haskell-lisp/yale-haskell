@@ -1,0 +1,2 @@
+This directory contains code to define FLIC structures and associated
+pretty-printers, and the traversal to convert AST to FLIC structures.

@@ -1,0 +1,22 @@
+In his paper "A Functional Animation Starter Kit" [ARYA88], Kevi Arya 
+proposes an approach to animation that uses functional languages. As
+Arya describes, the cost of computing power is falling. This is making
+the use of computer animation much more prevalent. However, languages
+such as C make it difficult to program animations. What is needed is
+a simpler, faster and more accessible way to program graphics. Functional
+languages are a very effective means for this, due to their higher order
+functions.
+ 
+	Kevi Arya goes on to provide such a functional animation package in
+the language Miranda. Haskell in particular is good functional language for
+two reasons. It is a completely functional language, doing even I/O in a 
+functional manner. Variables are evaluated in a lazy manner allowing infinite 
+lists to be manipulated easily, which suits the infinite frames format
+of animation.
+
+The following animations are provided here:
+
+  seaside.hs  - a seaside scene
+  planets.hs  - planets in orbit
+  palm.hs     - another seaside scene
+  birds.hs    - flying birds

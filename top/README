@@ -1,0 +1,12 @@
+This directory contains the top level of the compiler.
+Files found here:
+
+phases - the top level calls to the compiler phases; compilation init code
+errors - general error handlers
+globals - global variable definitions
+core-symbols - defines core symbols
+system-init - code to run once after the compiler is loaded.
+driver - top level functions which drive the compiler.  There are called
+         from the command interface or directly from the user.
+
+

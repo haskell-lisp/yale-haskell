@@ -1,0 +1,12 @@
+#!/bin/csh
+#
+# compile -- compile the Yale Haskell system from scratch.
+#
+#
+cd $Y2
+$CMUCL <<EOF
+(setf ext:*bytes-consed-between-gcs* 4000000)
+(proclaim '(optimize (speed 3) (safety 0) (debug 0) (ext:inhibit-warnings 3)))
+(load "cl-support/cl-init")
+(quit)
+EOF

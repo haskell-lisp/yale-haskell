@@ -1,0 +1,252 @@
+-- interface.scm -- define interface to primitives
+--
+-- author :  Sandra & John
+-- date   :  24 Apr 1992
+--
+-- This file declares the interface to the runtime system primitives.
+-- The actual definitions for the Lisp functions all appear elsewhere;
+-- they all have names like prim.xxx.  (They can actually be macros
+-- instead of functions since they're never referenced by name.)
+
+interface PreludePrims where
+
+{-# Prelude #-}
+
+import PreludeCore(Int,Integer,Float,Double,Char,Bool)
+import PreludeRational(Rational)
+
+error :: String -> a
+primCharToInt :: Char -> Int
+primIntToChar :: Int -> Char
+primEqChar, primNeqChar, primLeChar, primGtChar, primLsChar, primGeChar
+  :: Char -> Char -> Bool
+primMaxChar :: Int
+primEqFloat, primNeqFloat, primLeFloat, primGtFloat, primLsFloat, primGeFloat
+  :: Float -> Float -> Bool
+primFloatMax, primFloatMin :: Float -> Float -> Float
+primEqDouble, primNeqDouble, primLeDouble, primGtDouble, 
+              primLsDouble, primGeDouble
+  :: Double -> Double -> Bool
+primDoubleMax, primDoubleMin :: Double -> Double -> Double
+primPlusFloat, primMinusFloat, primMulFloat, primDivFloat
+  :: Float -> Float -> Float
+primPlusDouble, primMinusDouble, primMulDouble, primDivDouble
+  :: Double -> Double -> Double
+primNegFloat, primAbsFloat :: Float -> Float
+primNegDouble, primAbsDouble :: Double -> Double
+primExpFloat, primLogFloat, primSqrtFloat, primSinFloat, primCosFloat,
+  primTanFloat, primAsinFloat, primAcosFloat, primAtanFloat, primSinhFloat,
+  primCoshFloat, primTanhFloat, primAsinhFloat, primAcoshFloat, primAtanhFloat
+  :: Float -> Float
+primExpDouble, primLogDouble, primSqrtDouble, primSinDouble, primCosDouble,
+  primTanDouble, primAsinDouble, primAcosDouble, primAtanDouble, primSinhDouble,
+  primCoshDouble, primTanhDouble, primAsinhDouble, primAcoshDouble, primAtanhDouble
+  :: Double -> Double
+primPiFloat :: Float
+primPiDouble :: Double
+primRationalToFloat :: Rational -> Float
+primRationalToDouble :: Rational -> Double
+primFloatToRational :: Float -> Rational
+primDoubleToRational :: Double -> Rational
+primFloatDigits :: Int
+primFloatRadix :: Integer
+primFloatMinExp :: Int
+primFloatMaxExp :: Int
+primFloatRange :: Float -> (Int, Int)
+primDecodeFloat :: Float -> (Integer, Int)
+primEncodeFloat :: Integer -> Int -> Float
+primDoubleDigits :: Int
+primDoubleRadix :: Integer
+primDoubleMinExp :: Int
+primDoubleMaxExp :: Int
+primDoubleRange :: Double -> (Int, Int)
+primDecodeDouble :: Double -> (Integer, Int)
+primEncodeDouble :: Integer -> Int -> Double
+primEqInt, primNeqInt, primLeInt, primGtInt, primLsInt, primGeInt
+  :: Int -> Int -> Bool
+primIntMax, primIntMin :: Int -> Int -> Int
+primEqInteger, primNeqInteger, primLeInteger, primGtInteger,
+  primLsInteger, primGeInteger
+    :: Integer -> Integer -> Bool
+primIntegerMax, primIntegerMin :: Integer -> Integer -> Integer
+primPlusInt, primMinusInt, primMulInt :: Int -> Int -> Int 
+primMinInt,primMaxInt :: Int
+primNegInt, primAbsInt :: Int -> Int
+primPlusInteger, primMinusInteger, primMulInteger :: Integer -> Integer -> Integer 
+primNegInteger, primAbsInteger :: Integer -> Integer
+primQuotRemInt :: Int -> Int -> (Int, Int)
+primQuotRemInteger :: Integer -> Integer -> (Integer, Integer)
+primIntegerToInt :: Integer -> Int
+primIntToInteger :: Int -> Integer
+primNullBin :: Bin
+primIsNullBin :: Bin -> Bool
+primShowBinInt :: Int -> Bin -> Bin
+primShowBinInteger :: Integer -> Bin -> Bin
+primShowBinFloat :: Float -> Bin -> Bin
+primShowBinDouble :: Double -> Bin -> Bin
+primReadBinInt :: Bin -> (Int,Bin)
+primReadBinInteger :: Bin -> (Integer,Bin)
+primReadBinFloat :: Bin -> (Float,Bin)
+primReadBinDouble :: Bin -> (Double,Bin)
+primReadBinSmallInt :: Bin -> Int -> (Int,Bin)
+primAppendBin :: Bin -> Bin -> Bin
+
+primStringEq  :: [Char] -> [Char] -> Bool
+
+primAppend :: [a] -> [a] -> [a]
+primTake :: Int -> [a] -> [a]
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+build :: ((a -> [a] -> [a]) -> [b] -> [c]) -> [c]
+
+
+
+-- I've assigned complexities for arithmetic primitives as follows:
+-- Int and Char comparisons and arithmetic are very cheap (complexity 1).
+-- Double and Float comparsions are also cheap, but most implementations
+--   need to box the results of floating-point arithmetic so I have given
+--   them a complexity of 3.
+-- Integer operations need to do an extra bignum check that has a fixed
+--   overhead.  I assume that actual bignums will be rare and give them
+--   all a complexity of 2.
+
+{-#
+error :: LispName("prim.abort")
+primCharToInt ::    LispName("prim.char-to-int"), Complexity(0),NoConversion
+primIntToChar ::    LispName("prim.int-to-char"), Complexity(0),NoConversion
+primEqChar ::       LispName("prim.eq-char"), Complexity(1), NoConversion
+primNeqChar::       LispName("prim.not-eq-char"), Complexity(1), NoConversion
+primLeChar ::       LispName("prim.le-char"), Complexity(1), NoConversion
+primGtChar ::       LispName("prim.not-le-char"), Complexity(1), NoConversion
+primLsChar ::       LispName("prim.lt-char"), Complexity(1), NoConversion
+primGeChar ::       LispName("prim.not-lt-char"), Complexity(1), NoConversion
+primMaxChar ::      LispName("prim.max-char"), NoConversion
+primEqFloat ::      LispName("prim.eq-float"), Complexity(1)
+primNeqFloat ::     LispName("prim.not-eq-float"), Complexity(1)
+primLeFloat  ::     LispName("prim.le-float"), Complexity(1)
+primGtFloat  ::     LispName("prim.not-le-float"), Complexity(1)
+primLsFloat  ::     LispName("prim.lt-float"), Complexity(1)
+primGeFloat  ::     LispName("prim.not-lt-float"), Complexity(1)
+primFloatMax ::     LispName("prim.float-max"), Complexity(3)
+primFloatMin ::     LispName("prim.float-min"), Complexity(3)
+primEqDouble  ::    LispName("prim.eq-double"), Complexity(1)
+primNeqDouble ::    LispName("prim.not-eq-double"), Complexity(1)
+primLeDouble  ::    LispName("prim.le-double"), Complexity(1)
+primGtDouble  ::    LispName("prim.not-le-double"), Complexity(1)
+primLsDouble  ::    LispName("prim.lt-double"), Complexity(1)
+primGeDouble  ::    LispName("prim.not-lt-double"), Complexity(1)
+primDoubleMax ::    LispName("prim.double-max"), Complexity(3)
+primDoubleMin ::    LispName("prim.double-min"), Complexity(3)
+primPlusFloat  ::   LispName("prim.plus-float"), Complexity(3)
+primMinusFloat ::   LispName("prim.minus-float"), Complexity(3)
+primMulFloat   ::   LispName("prim.mul-float"), Complexity(3)
+primDivFloat   ::   LispName("prim.div-float"), Complexity(3)
+primPlusDouble  ::  LispName("prim.plus-double"), Complexity(3)
+primMinusDouble ::  LispName("prim.minus-double"), Complexity(3)
+primMulDouble   ::  LispName("prim.mul-double"), Complexity(3)
+primDivDouble   ::  LispName("prim.div-double"), Complexity(3)
+primNegFloat ::     LispName("prim.neg-float"), Complexity(3)
+primAbsFloat ::     LispName("prim.abs-float"), Complexity(3)
+primNegDouble ::    LispName("prim.neg-double"), Complexity(3)
+primAbsDouble ::    LispName("prim.abs-double"), Complexity(3)
+primExpFloat   ::   LispName("prim.exp-float")
+primLogFloat   ::   LispName("prim.log-float")
+primSqrtFloat  ::   LispName("prim.sqrt-float")
+primSinFloat   ::   LispName("prim.sin-float")
+primCosFloat   ::   LispName("prim.cos-float")
+primTanFloat   ::   LispName("prim.tan-float")
+primAsinFloat  ::   LispName("prim.asin-float")
+primAcosFloat  ::   LispName("prim.acos-float")
+primAtanFloat  ::   LispName("prim.atan-float")
+primSinhFloat  ::   LispName("prim.sinh-float")
+primCoshFloat  ::   LispName("prim.cosh-float")
+primTanhFloat  ::   LispName("prim.tanh-float")
+primAsinhFloat ::   LispName("prim.asinh-float")
+primAcoshFloat ::   LispName("prim.acosh-float")
+primAtanhFloat ::   LispName("prim.atanh-float")
+primExpDouble   ::  LispName("prim.exp-double")
+primLogDouble   ::  LispName("prim.log-double")
+primSqrtDouble  ::  LispName("prim.sqrt-double")
+primSinDouble   ::  LispName("prim.sin-double")
+primCosDouble   ::  LispName("prim.cos-double")
+primTanDouble   ::  LispName("prim.tan-double")
+primAsinDouble  ::  LispName("prim.asin-double")
+primAcosDouble  ::  LispName("prim.acos-double")
+primAtanDouble  ::  LispName("prim.atan-double")
+primSinhDouble  ::  LispName("prim.sinh-double")
+primCoshDouble  ::  LispName("prim.cosh-double")
+primTanhDouble  ::  LispName("prim.tanh-double")
+primAsinhDouble ::  LispName("prim.asinh-double")
+primAcoshDouble ::  LispName("prim.acosh-double")
+primAtanhDouble ::  LispName("prim.atanh-double")
+primPiFloat ::      LispName("prim.pi-float")
+primPiDouble ::     LispName("prim.pi-double")
+primRationalToFloat  :: LispName("prim.rational-to-float"), Complexity(3)
+primRationalToDouble :: LispName("prim.rational-to-double"), Complexity(3)
+primFloatToRational  :: LispName("prim.float-to-rational"), Complexity(3)
+primDoubleToRational :: LispName("prim.double-to-rational"), Complexity(3)
+primFloatDigits ::  LispName("prim.float-digits")
+primFloatRadix ::   LispName("prim.float-radix")
+primFloatMinExp ::  LispName("prim.float-min-exp")
+primFloatMaxExp ::  LispName("prim.float-max-exp")
+primFloatRange ::   LispName("prim.float-range")
+primDecodeFloat ::  LispName("prim.decode-float")
+primEncodeFloat ::  LispName("prim.encode-float")
+primDoubleDigits :: LispName("prim.double-digits")
+primDoubleRadix ::  LispName("prim.double-radix")
+primDoubleMinExp :: LispName("prim.double-min-exp")
+primDoubleMaxExp :: LispName("prim.double-max-exp")
+primDoubleRange ::  LispName("prim.double-range")
+primDecodeDouble :: LispName("prim.decode-double")
+primEncodeDouble :: LispName("prim.encode-double")
+primEqInt ::        LispName("prim.eq-int"), Complexity(1)
+primNeqInt::        LispName("prim.not-eq-int"), Complexity(1)
+primLeInt ::        LispName("prim.le-int"), Complexity(1)
+primGtInt ::        LispName("prim.not-le-int"), Complexity(1)
+primLsInt ::        LispName("prim.lt-int"), Complexity(1)
+primGeInt ::        LispName("prim.not-lt-int"), Complexity(1)
+primIntMax ::       LispName("prim.int-max"), Complexity(1)
+primIntMin ::       LispName("prim.int-min"), Complexity(1)
+primEqInteger ::    LispName("prim.eq-integer"), Complexity(2)
+primNeqInteger::    LispName("prim.not-eq-integer"), Complexity(2)
+primLeInteger ::    LispName("prim.le-integer"), Complexity(2)
+primGtInteger ::    LispName("prim.not-le-integer"), Complexity(2)
+primLsInteger ::    LispName("prim.lt-integer"), Complexity(2)
+primGeInteger ::    LispName("prim.not-lt-integer"), Complexity(2)
+primIntegerMax ::   LispName("prim.integer-max"), Complexity(2)
+primIntegerMin ::   LispName("prim.integer-min"), Complexity(2)
+primPlusInt  ::     LispName("prim.plus-int"), Complexity(1)
+primMinusInt ::     LispName("prim.minus-int"), Complexity(1)
+primMulInt   ::     LispName("prim.mul-int"), Complexity(1)
+primMinInt ::       LispName("prim.minint")
+primMaxInt ::       LispName("prim.maxint")
+primNegInt ::       LispName("prim.neg-int"), Complexity(1)
+primAbsInt ::       LispName("prim.abs-int"), Complexity(1)
+primPlusInteger  :: LispName("prim.plus-integer"), Complexity(2)
+primMinusInteger :: LispName("prim.minus-integer"), Complexity(2)
+primMulInteger   :: LispName("prim.mul-integer"), Complexity(2)
+primNegInteger ::   LispName("prim.neg-integer"), Complexity(2)
+primAbsInteger ::   LispName("prim.abs-integer"), Complexity(2)
+primQuotRemInt ::   LispName("prim.div-rem-int")
+primQuotRemInteger :: LispName("prim.div-rem-integer")
+primIntegerToInt :: LispName("prim.integer-to-int"), Complexity(1)
+primIntToInteger :: LispName("prim.int-to-integer"), Complexity(0)
+primNullBin ::      LispName("prim.nullbin")
+primIsNullBin ::    LispName("prim.is-null-bin"), Complexity(1)
+primShowBinInt ::   LispName("prim.show-bin-int"), Complexity(2)
+primShowBinInteger :: LispName("prim.show-bin-integer"), Complexity(2)
+primShowBinFloat ::   LispName("prim.show-bin-float"), Complexity(2)
+primShowBinDouble ::  LispName("prim.show-bin-double"), Complexity(2)
+primReadBinInt ::     LispName("prim.read-bin-int")
+primReadBinInteger :: LispName("prim.read-bin-integer")
+primReadBinFloat ::   LispName("prim.read-bin-float")
+primReadBinDouble ::  LispName("prim.read-bin-double")
+primReadBinSmallInt :: LispName("prim.read-bin-small-int")
+primAppendBin ::      LispName("prim.append-bin")
+primStringEq :: LispName("prim.string-eq"), Strictness("S,S"), NoConversion
+primAppend :: LispName("prim.append"), Strictness("S,N"), NoConversion
+primTake   :: LispName("prim.take"), Strictness("S,S"), NoConversion
+foldr   :: LispName("prim.foldr"), Strictness("N,N,S"), NoConversion
+build   :: LispName("prim.build"), Strictness("S"), NoConversion
+
+#-}

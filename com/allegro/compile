@@ -1,0 +1,15 @@
+#!/bin/csh
+#
+# compile -- compile the Yale Haskell system from scratch.
+#
+#
+cd $Y2
+$ALLEGRO <<EOF
+#+next (progn (load "com/allegro/next-patches/patch0149.fasl")
+              (load "com/allegro/next-patches/patch0151.fasl"))
+#+sparc (load "com/allegro/sparc-patches/patch0151.fasl")
+(make-package "MUMBLE-IMPLEMENTATION" :use '("LISP"))
+(proclaim '(optimize (speed 3) (safety 0) (compilation-speed 0)))
+(load "cl-support/cl-init")
+(excl:exit)
+EOF

@@ -1,0 +1,12 @@
+
+This is the actual prelude used by the Yale system.  This contains a many
+small changes to the standard prelude, mostly optimizer annotations.
+PreludeIO is totally different since we have flushed streams in favor
+of the monad.  Primitives are defined using the Haskell to Lisp interface.
+
+Arrays are implemented internally using destructive updates - no array
+primitive involves more than one copy operation and lookup is constant
+time.
+
+The data constructors for Complex and Rational are strict.
+

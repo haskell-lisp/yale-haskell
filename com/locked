@@ -1,0 +1,14 @@
+#!/bin/csh
+#
+#
+# identify locked source files
+#
+
+cd $Y2
+foreach i (*/*.scm */*.lisp)
+  if (-e $i:h/RCS/$i:t,v) then
+    foreach j (`rlog -R -L $i:h/RCS/$i:t,v`)
+      ls -l $i
+    end
+  endif
+end

@@ -1,0 +1,10 @@
+#!/bin/csh
+#
+#
+# identify unchecked-in source files
+#
+
+cd $Y2
+foreach i (*/*.scm)
+  if !(-e $i:h/RCS/$i:t,v) ls -l $i
+end

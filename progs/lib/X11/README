@@ -1,0 +1,11 @@
+This directory contains the Haskell->CLX support code.
+
+If you see errors like "ID 42 is a :WM_RESIZE_HINTS, not a window",
+you can get rid of them by loading clx-patch.lisp.  This seems to be a
+bug where CLX is not consistent with the protocol in some way; we've
+seen it on some machines and not others.  The line
+
+(load "$HASKELL/progs/lib/X11/clx-patch.lisp")
+
+can be placed in your .yhaskell file to load the patch on startup.
+

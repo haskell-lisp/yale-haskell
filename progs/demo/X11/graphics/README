@@ -1,0 +1,31 @@
+HENDERSON GRAPHICS LIBRARY
+by Syam Gadde
+and Bo Whong
+
+-------------------------------------------------
+
+To use the Henderson Library, run emacs with a module that
+imports HendersonLib, such as "sqrlmt.hs".  For "sqrlmt.hs",
+run the dialogue "final" or "skewedfinal".  
+
+-------------------------------------------------
+
+henderson.hs	- Haskell source for the Henderson library.
+henderson.hu	
+sqrlmt.hs	- Haskell source for dialogue that draws "Square Limit".
+sqrlmt.hu	
+p.pic		- First of four pictures used to construct "Square Limit".
+q.pic		- Second of four pictures used to construct "Square Limit".
+r.pic		- Third of four pictures used to construct "Square Limit".
+s.pic		- Four of four pictures used to construct "Square Limit".
+new.pic		- Hudak's house
+stop.pic	- A "hand-drawn" stop sign border
+text.pic	- The word "STOP!" (hand-drawn)
+strange.pic	- Overlays stop.pic and Flip of text.pic
+squarebox.xwd	- A window dump of a box-like structure made of four
+			square limits.  Use "xwud -in squarebox.xwd" to view.
+sksl.xwd	- A window dump of "squarelimit" in a skewed bounding box.
+			("skewedfinal" from sqrlmt.hs.)
+sl.xwd		- A window dump of Square Limit.
+			("squarelimit" from sqrlmt.hs.)
+manual		- The manual in Island Write format.

@@ -1,0 +1,454 @@
+104 pgscriptver 
+
+100 DefSpaceEx 100 DefCharEx 1 DefNormalHyphenationOn 100 
+DefTypeColor (Times-Roman) DefTypeFace ENGLISH DefLanguage 12 DefPointSize 
+USE_POINTSIZE DefSetSize (@default) DefTypeResource 
+
+LEFT DefJustifyFlags 2 DefBeginParaLeadValue ABSOLUTE DefBeginParaLeadMode 2 
+DefEndParaLeadValue ABSOLUTE DefEndParaLeadMode 120 DefLeadValue 
+PROPORTIONAL DefLeadMode 1 46 0 TAB_LEFT  720 DefTab 1 46 0 
+TAB_LEFT  2160 DefTab 1 46 0 TAB_LEFT  3600 DefTab 1 46 0 
+TAB_LEFT  5040 DefTab 1 46 0 TAB_LEFT  6480 DefTab 1 46 0 
+TAB_LEFT  7920 DefTab 1 46 0 TAB_LEFT  9360 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 0 46 0 TAB_LEFT  24480 DefTab 0 46 0 
+TAB_LEFT  24480 DefTab 80 DefWSMN 100 DefWSNM 150 DefWSMX 110 
+DefLSMX 100 DefLeaderEx 46 DefLeaderChar 0 DefFirstIndent 0 
+DefLeftIndent 0 DefRightIndent 0 DefNumberingOn 0 DefNumberingType 0 
+DefNumberingRestart 1 DefNumberingLevel 0 DefNumberingStyle 0 
+DefNumberingTabAfter 1 DefNumberingShowAllLevels 1 DefNumberingStart 1 
+DefNumberingIncrement () DefNumberingPrefix () DefNumberingSuffix (.) 
+DefNumberingSeparator (*default) DefParaResource 
+
+0 DefLineWidth TRANSPARENT DefPenColor TRANSPARENT DefFillColor 1 DefIG 300 
+DefResolution 100 DefYScale 100 DefXScale (=default) DefPolyResource 
+
+0 DefPageDimensions 12240 DefPageWidth 15840 DefPageHeight 1440 
+DefInsideMargin 1080 DefOutsideMargin 1080 DefTopMargin 1080 
+DefBottomMargin 0 DefOrientation 0 DefPageStyle 1 DefColumns 360 
+DefGutter (%default) DefMasterPage ResDefEnd 
+
+0 DefFirstLeft 0 DefDocSetup 1 DefNumPages 1 AutoPage 1 
+DefStartPageNum () DefPageNumPrefix 1 DefGraphicLocation document 
+
+1 DefAutoPage 
+0 (%default) 1 DefPage 
+1 DefAutoPage 
+0 (%default) 2 DefPage 
+
+POLY_OBJECT POLY_EMPTY |  DefPolyType 
+
+0 DefLineWidth TRANSPARENT DefPenColor TRANSPARENT DefFillColor 1 DefIG 300 
+DefResolution 100 DefYScale 100 DefXScale (=default) DefPolyResId 0 
+DefMasterRef 
+MP_CPSUCC_LINK MP_CPPRED_LINK POLY_COLUMN | |  DefSLinksFlags 0 DefStreamSucc 0 
+DefStreamPred 
+1440 1080 11160 1080 11160 14760 1440 14760 4 
+POLY_OBJECT POLY_EMPTY |  (%default) 0 1 TextPolygon 
+
+POLY_OBJECT POLY_TEXT |  DefPolyType 
+
+0 DefLineWidth TRANSPARENT DefPenColor TRANSPARENT DefFillColor 1 DefIG 300 
+DefResolution 100 DefYScale 100 DefXScale (=default) DefPolyResId 1 
+DefMasterRef 
+
+MP_CPSUCC_LINK MP_CPPRED_LINK LINK_OVERFLOW MPREF_VALID POLY_COLUMN AUTO_STREAM | | | | | 
+DefSLinksFlags 4 DefStreamSucc 0 DefStreamPred 3 DefTextHandle 
+1440 1080 11160 1080 11160 14760 1440 14760 4 
+POLY_OBJECT POLY_TEXT |  (1) 0 2 TextPolygon 
+
+3 asciitextstream 
+<(Courier) cf ><9 cs>The Henderson Library--<eop>
+by Syam Gadde<eop>
+and Bo Whong<eop>
+<eop>
+The Henderson Library is a toolkit with which one can use Functional Geometry, 
+as proposed by Peter Henderson in his paper "Functional Geometry".  This is a s
+cheme by which "Picture"s can be described in an abstract data type, and a numb
+er of functions can be applied to it.  This results in a very elegant method to
+ produce complex pictures from simple ones.  The example Henderson uses is "Squ
+are Limit" by M. C. Escher,  which can be constructed with four simple pictures
+.<eop>
+<eop>
+------------------------<eop>
+ADTs and Type Synonyms<eop>
+<eop>
+The Picture data type is composed of eight different types of pictures.  They a
+re:<eop>
+<eop>
+data<eop>
+Picture = Nil                                 - empty picture<eop>
+        | Flip Picture                        - picture flipped on the y-axis<e
+op>
+        | Beside Float Picture Float Picture  - two pictures placed side by sid
+e <eop>
+                                              - in accordance to the ratio of t
+he<eop>
+                                              - two floats<eop>
+        | Above Float Picture Float Picture   - two pictures placed one on top 
+of<eop>
+                                              - another in accordance to the ra
+tio<eop>
+                                              - of the two floats<eop>
+        | Rot Picture                         - picture is rotated 90 degrees <
+eop>
+                                              - counterclockwise<eop>
+        | File String                         - picture is stored as an externa
+l<eop>
+                                              - file<eop>
+        | Overlay Picture Picture             - two pictures are drawn such tha
+t<eop>
+                                              - one lays on top of the other<eo
+p>
+        | Grid Int Int SegList                - picture type that contains the 
+list<eop>
+                                              - of picture's line segments alon
+g<eop>
+                                              - with the size of the inital pic
+ture<eop>
+<eop>
+The type synonyms are pretty much self explanatory.<eop>
+<eop>
+        Hostname<tab><tab><tab>- a string of the hostname<eop>
+        Filename                              <tab>- a string of the filename<e
+op>
+        IntPoint                              <tab>- a tuple of integers repres
+enting<eop>
+                                              <tab>- the coordinates of a point
+<eop>
+        IntSegment                            <tab>- a tuple of Intpoints repre
+senting<eop>
+                                              <tab>- the endpoints of a line se
+gment<eop>
+        IntSegList                            <tab>- a list of IntSegments <eop
+>
+        Point                                 <tab>- same as IntPoint except in
+ place of<eop>
+<tab><tab><tab>             <tab>- intergers, they are floating points<eop>
+        Segment                               <tab>- same as IntSegment except 
+in place<eop>
+       <tab><tab>            <tab>- of intergers, they are floating <eop>
+         <tab><tab><tab>- points<eop>
+        SegList                               <tab>- same as IntsegList except 
+in place<eop>
+      <tab><tab><tab><tab>- of intergers, they are floating <eop>
+         <tab><tab><tab>- points<eop>
+        Vector                                <tab>- a tuple of floating points
+ to<eop>
+        <tab><tab><tab>- to represent a vector<eop>
+        Vtriple                               - a 3-tuple of Vectors<eop>
+        HendQuartet                           - a 4-tuple of Integers for the s
+ize<eop>
+                                              - of the Henderson window<eop>
+        PEnv                                  - a tuple of a Filename and a Pic
+ture<eop>
+                                              - for storing already opened file
+s in<eop>
+                                              - in order to save time and memor
+y<eop>
+                                              - when a file needs to be opened 
+more<eop>
+                                              - than once<eop>
+<eop>
+-------------------------------------------------------------------------------
+----<eop>
+Function: create (an exported function from the HendersonLib)<eop>
+<eop>
+The purpose of the create function is to provide the user with a function to <e
+op>
+draw a picture from a graphics interface.  The user may choose to create a pict
+ure<eop>
+file by inputing the the lines and points manually into a file or (s)he may cho
+ose<eop>
+to use the create function.<eop>
+<eop>
+Functionality of create:<eop>
+           create :: Hostname -<ra> Filaname -<ra> Int -<ra> Int -<ra> IO()<eop
+>
+<eop>
+create takes as input a hostname, a filename, and two integers for the size of 
+the <eop>
+window to be opened.  Two windows should appear, one for the input of lines and
+<eop>
+another showing the current position of the mouse.  These windows will be label
+ed<eop>
+accordingly.<eop>
+To draw a line on the file window, move the cursor to the desired position, the
+n<eop>
+hit any key on the keybroad. This point will be the beginning of the line segme
+nt.<eop>
+Next move the cursor to the position of where the user wants the end of the lin
+e<eop>
+segment to be, then hit any key from the keyboard again.  A line should appear.
+<eop>
+The coordinates of the endpoints of each line drawn  will also be printed out o
+nto <eop>
+standard output.<eop>
+To signal completion of a file, press any button on the mouse.  The user must <
+eop>
+remember though that this is only applicable after a completed drawing of a lin
+e.<eop>
+For example, pressing the mouse button will not work if one of the endpoints of
+ a<eop>
+line is drawn but the other endpoint is not. create will not recognize the mous
+e <eop>
+button press event until a second endpoint is drawn.<eop>
+<eop>
+Advantages of create:<eop>
+ provides a quick and fun way to create a picture file.<eop>
+<eop>
+Disadvantages of create:<eop>
+ If the file does not exist, create will create the file and then store the pic
+ture<eop>
+ to it.  However, if the file exists, create will automatically delete the cont
+ents<eop>
+ of that file before storing the new picture.<eop>
+<eop>
+-------------------------------------------------------------------------------
+----<eop>
+Function: modify (an exported function from the HendersonLib)<eop>
+<eop>
+The purpose of the modify function is to provide the user with a function make 
+<eop>
+additions to an already existing picture file using a graphics interface.  The 
+user<eop>
+may choose to modify the picture file by adding the the lines and points manual
+ly <eop>
+into the file or (s)he may choose to use the modify function.<eop>
+<eop>
+Functionality of modify:<eop>
+           modify :: Hostname -<ra> Filaname -<ra> IO()<eop>
+<eop>
+modify takes as input a hostname and a filename. Tow windows should appear.  Th
+e <eop>
+size of the draw window will be the same as the x and y coordinates already in 
+the<eop>
+file. These windows will be labeled accordingly.  The existing picture will app
+ear<eop>
+first before any input is allowed.<eop>
+To draw a line on the file window, move the cursor to the desired position, the
+n<eop>
+hit any key on the keybroad. This point will be the beginning of the line segme
+nt.<eop>
+Next move the cursor to the position of where the user wants the end of the lin
+e<eop>
+segment to be, then hit any key from the keyboard again.  A line should appear.
+<eop>
+The coordinates of the endpoints of each line drawn  will also be printed out o
+nto <eop>
+standard output.<eop>
+To signal completion of a file, press any button on the mouse.  The user must <
+eop>
+remember though that this is only applicable after a completed drawing of a lin
+e.<eop>
+For example, pressing the mouse button will not work if one of the endpoints of
+ a<eop>
+line is drawn but the other endpoint is not.  modify will not recognize the mou
+se <eop>
+button press event until a second endpoint is drawn.<eop>
+<eop>
+Advantages of modify:<eop>
+ provides a quick and fun way to modify a picture file without having to go int
+o<eop>
+ the file and manually add on the coordinates of the additional lines<eop>
+<eop>
+Disadvantages of modify:<eop>
+ Existing lines can not be deleted and any additional lines, whether intentiona
+l or<eop>
+ unintentional, will be appended to the picture and stored in the file.<eop>
+<eop>
+--------------------------------------------------------<eop>
+Function: sendToDraw<eop>
+<eop>
+Type of sendToDraw:<eop>
+  sendToDraw :: XWindow -<ra> XScreen -<ra> XDisplay -<ra> <eop>
+              XPixel -<ra> XPixel -<ra> Plot -<ra> IO()<eop>
+<eop>
+Usage:<eop>
+  sendToDraw win scn dis fg_color bg_color plt<eop>
+<eop>
+'sendToDraw' is the most primitive function in the part of the Henderson<eop>
+library that deals with X windows, and therefore, can be used as a very<eop>
+powerful tool.  It draws a Plot plt (see 'plot' function) in the given XWindow<
+eop>
+win, and on the given XScreen and XDisplay scn and dis, drawing the lines in<eo
+p>
+the foreground color.  This function allows the programmer to draw more than<eo
+p>
+one Picture to the same window.<eop>
+<eop>
+Arguments:<eop>
+  win - the XWindow in which to draw plt<eop>
+  scn - the screen which contains win<eop>
+  dis - the display which contains scn<eop>
+  fg_color - an XPixel the color of which the plt will be drawn in.  Note that<
+eop>
+<tab>this allows the programmer to draw different plt's in different colors.<eo
+p>
+  bg_color - unused, but required.<eop>
+--------------------------------------------------------<eop>
+Function: plot<eop>
+<eop>
+Type of 'plot':<eop>
+  plot :: Picture -<ra> VTriple -<ra> PEnv -<ra> ((Plot, PEnv) -<ra> IO()) -<ra
+> IO()<eop>
+<eop>
+Usage:<eop>
+  plot pic (a,b,c) env func<eop>
+<eop>
+The 'plot' function is needed to create a Plot which would be normally sent to<
+eop>
+a function such as sendToDraw.  'plot' converts a Picture pic into a format<eop
+>
+that sendToDraw can deal with.<eop>
+'plot' also takes three vectors which specify the bounding box in which the<eop
+>
+Picture is to be drawn.  The first vector (a) specifies the upper left corner<e
+op>
+of the bounding box.  The next two vectors specify the bounding box itself,<eop
+>
+with respect to the first vector.  This allows for non-rectangular bounding<eop
+>
+boxes.  For example, the vector triple ((50,50), (100,0), (0,100)) specifies<eo
+p>
+the following bounding box:<eop>
+<eop>
+            (0,0)----------------------------------<eop>
+                 |<eop>
+                 |  (50,50)<eop>
+                 |     _______________ (150,0)  <eop>
+                 |     |             |<eop>
+                 |     |             |<eop>
+                 |     |             |<eop>
+                 |     |             |<eop>
+                 |     |             |<eop>
+                 |     |_____________| (150,150)<eop>
+                 |  (0,150)<eop>
+<eop>
+<eop>
+A vector triple of ((0,0), (100,300), (0,100)) would specify:<eop>
+<eop>
+            (0,0)-------------------------------------<eop>
+                 ||\<eop>
+                 || \<eop>
+                 ||  \<eop>
+          (0,100)||   \<eop>
+                 |\    \<eop>
+                 | \    \<eop>
+                 |  \    \<eop>
+                 |   \    \ (100,300)<eop>
+                 |    \   | <eop>
+                 |     \  |<eop>
+                 |      \ |<eop>
+                 |       \| (100,400)<eop>
+<eop>
+Arguments:                 <eop>
+  pic - the Picture to be converted<eop>
+  a - a vector specifying the upper left corner of the bounding box<eop>
+<tab>of the picture.<eop>
+  b - a vector understood to start at 'a' and specifying the upper edge of<eop>
+
+<tab>the bounding box.<eop>
+  c - a vector understood to start at 'a' and specifying the left edge of<eop>
+<tab>the bounding box.<eop>
+--------------------------------------------------------<eop>
+Function: draw<eop>
+<eop>
+Type of draw:<eop>
+  draw :: Hostname -<ra> Picture -<ra> VTriple -<ra> HendQuartet -<ra> IO()<eop
+>
+<eop>
+Usage:<eop>
+  draw host pic (a,b,c) (m,n,p,q)<eop>
+<eop>
+'draw' is a higher-level function than sendToDraw, and is useful to use when<eo
+p>
+the programmer wishes only to draw one Picture on the screen.  This function<eo
+p>
+does most of the work that the programmer would normally have to do when using<
+eop>
+sendToDraw.  'draw' opens a window at host with upper left coordinates m and n<
+eop>
+(on an X server that lets the user position any child window of the root<eop>
+window, these coordinates mean nothing), and with width p and height q.<eop>
+'draw' then calls 'plot' on pic and (a,b,c) and sends the result to sendToDraw,
+<eop>
+which finally draws the picture to the window.<eop>
+<eop>
+Arguments:<eop>
+  host - host on which to open a display, i.e. "tucan:0"<eop>
+  pic - the Picture to be drawn<eop>
+  (a,b,c) - the vector triple specifying the bounding box to be sent to<eop>
+<tab>plot (see 'plot' function)<eop>
+  (m,n,p,q) - upper left corner x (m), upper left corner y (n), width (p),<eop>
+
+<tab>and height (q), of window to be opened.<eop>
+<eop>
+-----------------------------------------------------------<eop>
+<eop>
+Module: SquareLimit<eop>
+<eop>
+This module is a sample user module that can be used to draw Square Limit, a wo
+odcut by M. C. Escher.  To draw "SquareLimit" on your host, run the dialogue:<e
+op>
+<tab>final host<eop>
+where 'host' is the host running X, such as "turtle:0".<eop>
+<eop>
+To draw a slightly more interesting picture, tun the dialogue:<eop>
+<tab>skewedfinal host<eop>
+and it will draw "SquareLimit" in a bounding box shaped as a diamond.<eop>
+<eop>
+
+<textstream_end> 
+
+POLY_OBJECT POLY_TEXT |  DefPolyType 
+
+0 DefLineWidth TRANSPARENT DefPenColor TRANSPARENT DefFillColor 1 DefIG 300 
+DefResolution 100 DefYScale 100 DefXScale (=default) DefPolyResId 1 
+DefMasterRef 
+
+MP_CPSUCC_LINK MP_CPPRED_LINK LINK_OVERFLOW MPREF_VALID POLY_COLUMN AUTO_STREAM | | | | | 
+DefSLinksFlags 0 DefStreamSucc 2 DefStreamPred 3 DefTextHandle 
+1440 1080 11160 1080 11160 14760 1440 14760 4 
+POLY_OBJECT POLY_TEXT |  (2) 0 4 TextPolygon 
+
+BeginProfile 
+(Number of Pages) (5)  DefProfileString 
+(Language) (ENGLISH)  DefProfileString 
+(Version) (IslandWrite Version 2.3)  DefProfileString 
+(Creation Date) (gadde May 7, 1993 3:55 PM)  DefProfileString 
+(Text Formats) (default)  DefProfileString 
+(Container Formats) (default)  DefProfileString 
+(Page Formats) (default)  DefProfileString 
+(Fonts) (Courier)  DefProfileString 
+(Fonts) (Times-Roman)  DefProfileString 
+(File Path) ()  DefProfileString 
+(External Contents) ()  DefProfileString 
+(Title) ()  DefProfileString 
+(Status) ()  DefProfileString 
+(Distribution List) ()  DefProfileString 
+(Preparer) ()  DefProfileString 
+(Owner) ()  DefProfileString 
+(Author) ()  DefProfileString 
+(Superseded Documents) ()  DefProfileString 
+EndProfile 
+
+pgscriptdone 

@@ -1,0 +1,7 @@
+:o= foldr inline constant
+$HASKELL_LIBRARY/X11/xlib.hu
+gobang.hs
+misc.hi
+utilities.hs
+redraw.hs
+weights.hs

@@ -1,0 +1,15 @@
+This is the import / export phase.  This process is accomplished as follows:
+
+a) Local definitions are created in each module.  These are entered into the
+   local symbol table.
+b) Imports to non-local modules are completely resolved.
+c) Local import/export is performed via a fixpoint:
+    1) Export: definitions added in the previous round are filtered by the
+       export list and placed in a fresh export list.
+    2) Each module imports from the fresh export list of the other modules.
+       Any import not already present is placed on a new fresh export list.
+   When no fresh exports are generated, the iteration is complete.
+d) Missing exports and imports are checked for.
+
+
+

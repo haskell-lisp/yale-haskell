@@ -1,0 +1,55 @@
+#!/bin/csh
+#
+# savesys-xlib -- build a saved executable in bin/new-lucid-clx-haskell
+#
+#
+cd $Y2
+setenv PRELUDEBIN $Y2/progs/prelude/lucid
+if !(-e $PRELUDEBIN/Prelude.sbin) then
+  echo "Build the prelude first, stupid..."
+  exit
+  endif
+setenv CLXFILE /cs/licensed/sclisp-4.0/windows-x.sbin
+setenv LIBRARYBIN $Y2/progs/lib/bin/lucid
+if !(-e $LIBRARYBIN/xlib.sbin) then
+  echo "Build the xlib stuff first, silly..."
+  exit
+  endif
+$LUCID <<EOF
+;;; Load the Haskell system.
+(make-package "MUMBLE-IMPLEMENTATION" :use '("LISP"))
+(setf lcl:*record-source-files* nil)
+(load "cl-support/cl-init")
+;;; Set various internal switches to appropriate values for running
+;;; Haskell code.
+(proclaim '(optimize (speed 3) (safety 0) (compilation-speed 0)))
+(lcl:compiler-options :file-messages nil)
+(setf lcl:*redefinition-action* nil)
+(setf *load-verbose* nil)
+(in-package :mumble-user)
+(setf *printers* '(compiling loading))
+(setf *optimizers* '())
+(setf *compile-interface* '#t)
+(setf *interface-code-quality* 1)
+(setf *code-chunk-size* 200)
+;;; Load the prelude.
+(compile/load *prelude-unit-filename*)
+;;; Load the X support.
+(load "\$CLXFILE")
+(compile/load "\$HASKELL_LIBRARY/X11/xlib")
+(setf *haskell-compiler-update* 
+	(string-append *haskell-compiler-update* "-X11"))
+;;; Set up the saved system.
+(define (haskell-toplevel)
+  (load-init-files)
+  (do () ('#f)
+    (lcl:with-simple-restart (restart-haskell "Restart Haskell.")
+      (heval))))
+(define (restart-haskell)
+  (lcl:invoke-restart 'restart-haskell))
+(lcl:gc)
+(lcl:disksave "bin/new-lucid-clx-haskell"
+  :reserved-free-segments 64 :dynamic-free-segments 25
+  :restart-function 'haskell-toplevel :full-gc '#t)
+(lcl:quit)
+EOF

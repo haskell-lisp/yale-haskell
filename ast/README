@@ -1,0 +1,29 @@
+This directory defines the primary data structures used in the compiler
+using the `define-struct' macro defined in the struct directory.
+
+Structures are divided into the following catagories:
+
+Basic structures: (basic-structs)
+  References to variables, data constructors, classes, type constructors
+    All references contain the name of the object referred to and a
+    field that will receive the actual definition object when scoping
+    has been resolved.
+  Fixity: (l | n | r, Int)
+
+Module structures: (module-structs)
+  The module ast, import & export related ast's, and fixity definition.
+
+Type system structures: (type-structs)
+  The representation of data types and the type related declarations:
+  type, data, class, and instance.
+
+Value declarations: (valdef-structs)
+  
+Expressions: (expr-structs)
+
+Definitions: (definition-structs)
+
+Flic structures: (flic-structs)
+
+
+

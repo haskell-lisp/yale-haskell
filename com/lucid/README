@@ -1,0 +1,39 @@
+This directory contains command scripts used for building Yale Haskell
+from the source distribution under Lucid Common Lisp.  We have been using
+Lucid version 4.0.0 on a Sparc, but we don't expect that there would
+be difficulties in building with Lucid on other platforms.
+
+Developers need to source haskell-development instead of haskell-setup
+in the .cshrc file.
+
+To rebuild the system:
+
+* You need to define environment variables Y2 and LUCID to point to the
+  appropriate pathnames.  See the haskell-development script for details.
+
+* Make sure that the environment variable PRELUDEBIN (in the 
+  haskell-setup script) points to $PRELUDE/lucid.
+
+* Execute the "compile" script.  This will recompile all of the Lisp 
+  source files that make up the Yale Haskell system.  Compiled files are
+  put in the "lucid" subdirectory of each source directory.
+
+* Execute the "build-prelude" script to compile the standard prelude.  
+  Note that this process tends to use up a huge amount of memory!
+
+* Execute the "savesys" script to build a new executable.
+
+* The new executable is initially called "bin/new-lucid-haskell".  Try
+  it out.  If it works, you should rename it to "bin/lucid-haskell".
+  Make sure that HASKELLPROG (in the haskell-setup script) is correct.
+
+* If you want to build an executable with the X support, you'll also
+  need to run the "build-xlib" and "savesys-xlib" scripts.  You
+  need to edit these scripts to change the pathname of the file 
+  containing the CLX library (or suppress the load entirely if you
+  are using a Lisp executable with CLX pre-loaded.).
+
+Important note for Emacs users: We've been told that Lucid provides
+some patches to GNU Emacs that cause the Haskell Emacs mode not to work.
+(Apparently these patches redefine some of the interprocess communication
+functions in an incompatible way.)  Use a standard Emacs.

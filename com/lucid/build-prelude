@@ -1,0 +1,36 @@
+#!/bin/csh
+#
+# build-prelude -- recompile the prelude, saving the old one as old-prelude.*
+#
+#
+cd $Y2
+setenv PRELUDEBIN $Y2/progs/prelude/lucid
+if (-e $PRELUDEBIN/Prelude.sbin) then
+  rm $PRELUDEBIN/old*
+  foreach i ($PRELUDEBIN/Prelude*.{sbin,scm})
+    mv $i $PRELUDEBIN/old-$i:t
+    end
+  endif
+$LUCID <<EOF
+;; Need a big heap to compile the prelude.
+(lcl:change-memory-management :expand 512 :growth-limit 2048)
+;; This will make sure any files that need to get compiled will be
+;; compiled with Lucid's production compiler.  If you want to recompile
+;; everything from scratch, execute the "clean" script first, or
+;; else use the "compile" script to do this.
+(proclaim '(optimize (speed 3) (safety 0) (compilation-speed 0)))
+(make-package "MUMBLE-IMPLEMENTATION" :use '("LISP"))
+(load "cl-support/cl-init")
+(in-package :mumble-user)
+(setf *printers* '(phase-time dump-stat))
+(setf *optimizers* *all-optimizers*)
+;; Set appropriate compiler settings for processing the prelude.
+;; Use production compiler on prelude code and split it up into pieces.
+;; Use fast development compiler on interface.
+(setf *code-chunk-size* 200)
+(setf *compile-interface* '#t)
+(setf *interface-code-quality* 2)
+(setf *interface-chunk-size* '#f)
+(compile/compile *prelude-unit-filename*)
+(lcl:quit)
+EOF

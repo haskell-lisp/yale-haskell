@@ -1,0 +1,2 @@
+This directory contains the code walker for the scoping and
+precedence parsing phase of the compiler.

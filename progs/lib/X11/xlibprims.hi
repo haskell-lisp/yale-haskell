@@ -1,0 +1,1465 @@
+-- 4/13/93 add xTestEventMask, xTestStateMask
+-- 4/14/93 add xMArrayLength,
+--             xGetEventN
+-- 4/15/93 change xKeycodeCharacter
+--         add xKeysymCharacter
+--         add xHandleError
+--         add xError
+-- 4/27/93 Change Bool to XSwitch in XWinAttribute, XGCAttribute
+
+interface XLibPrims where
+
+import XLibTypes(
+                 XDisplay, XScreen, XWindow, XGcontext, XPixmap,
+                 XColormap, XCursor, XFont, XImage, XMaybe, XError,
+                 XBitmap, XKeysymTable, XBitVec,
+                 XPixarray, XByteVec, XAtom, XProperty,
+                 XPixel, XDrawable, XTime, XSwitch,
+		 XWindowPlace, XEventMode, XEventKind,
+		 XWindowVisibility, XWindowStackMode,
+		 XPropertyState, XMapReqType, XGraphFun,
+		 XEvent, XEventType, XEventSlot, XEventMask,
+		 XEventMaskKey, XStateMask, XStateMaskKey,
+		 XWinAttribute,XGCAttribute, XImAttribute, 
+		 XGrabAttribute, XArcMode, XCapStyle,
+		 XClipMask, XFillRule, XFillStyle, 
+		 XFunction, XJoinStyle, XLineStyle,
+		 XSubwindowMode, XPoint, XSize, XRect,
+		 XArc, XBitmapFormat, XByteOrder,
+		 XPixmapFormat, XVisualInfo, XVisualClass,
+		 XFillContent, XBackingStore, XGravity,
+		 XWindowClass, XMapState, XImageData, 
+		 XImageFormat, XImageType, XDrawDirection,
+		 XColor, XInputFocus, XGrabStatus,
+		 XKeysym, XCloseDownMode, XScreenSaver)
+
+xHandleError		:: (XError -> IO a) -> IO a -> IO a
+xError			:: String -> IO a
+
+xEventType		:: XEvent -> XEventType
+xEventWindow 		:: XEvent -> XWindow
+xEventEventWindow	:: XEvent -> XWindow
+xEventCode		:: XEvent -> Int
+xEventPos		:: XEvent -> XPoint
+xEventState		:: XEvent -> XStateMask
+xEventTime		:: XEvent -> XTime
+xEventRoot		:: XEvent -> XWindow
+xEventRootPos		:: XEvent -> XPoint
+xEventChild		:: XEvent -> (XMaybe XWindow)
+xEventSameScreenP	:: XEvent -> Bool
+xEventHintP		:: XEvent -> Bool
+xEventMode		:: XEvent -> XEventMode
+xEventKind		:: XEvent -> XEventKind
+xEventFocusP		:: XEvent -> Bool
+xEventKeymap		:: XEvent -> XBitVec
+xEventRequest		:: XEvent -> XMapReqType
+xEventStart		:: XEvent -> Int
+xEventCount		:: XEvent -> Int
+xEventRect		:: XEvent -> XRect
+xEventDrawable		:: XEvent -> XDrawable
+xEventXGraphFun		:: XEvent -> XGraphFun
+xEventPlace		:: XEvent -> XWindowPlace
+xEventBorderWidth	:: XEvent -> Int
+xEventAboveSibling	:: XEvent -> (XMaybe XWindow)
+xEventOverrideRedirectP	:: XEvent -> Bool
+xEventParent		:: XEvent -> XWindow
+xEventConfigureP	:: XEvent -> Bool
+xEventVisibility	:: XEvent -> XWindowVisibility
+xEventNewP		:: XEvent -> Bool
+xEventInstalledP	:: XEvent -> Bool
+xEventStackMode		:: XEvent -> XWindowStackMode
+xEventValueMask		:: XEvent -> Int
+xEventSize		:: XEvent -> XSize
+xEventMessage		:: XEvent -> XProperty
+xEventPropertyState	:: XEvent -> XPropertyState
+xEventAtom		:: XEvent -> XAtom
+xEventSelection		:: XEvent -> XAtom
+xEventTarget		:: XEvent -> XAtom
+xEventProperty		:: XEvent -> (XMaybe XAtom)
+xEventRequestor		:: XEvent -> XWindow
+
+xSetEventMaskKey 	:: XEventMask -> XEventMaskKey -> XEventMask
+xClearEventMaskKey 	:: XEventMask -> XEventMaskKey -> XEventMask
+xTestEventMaskKey 	:: XEventMask -> XEventMaskKey -> Bool
+
+xSetStateMaskKey 	:: XStateMask -> XStateMaskKey -> XStateMask
+xClearStateMaskKey 	:: XStateMask -> XStateMaskKey -> XStateMask
+xTestStateMaskKey 	:: XStateMask -> XStateMaskKey -> Bool
+
+
+-- DISPLAYS
+
+-- open
+
+xOpenDisplay 			:: String 		-- host:display
+				-> IO XDisplay
+
+-- display attributes
+
+xDisplayAuthorizationData	:: XDisplay -> String
+xDisplayAuthorizationName	:: XDisplay -> String
+xDisplayBitmapFormat		:: XDisplay -> XBitmapFormat
+xDisplayByteOrder		:: XDisplay -> XByteOrder
+xDisplayDisplay 		:: XDisplay -> Int
+xSetDisplayErrorHandler		:: XDisplay -> (XError -> IO ()) -> IO () 
+xDisplayImageLsbFirstP		:: XDisplay -> Bool
+xDisplayMaxKeycode		:: XDisplay -> Int
+xDisplayMaxRequestLength	:: XDisplay -> Int
+xDisplayMinKeycode		:: XDisplay -> Int
+xDisplayMotionBufferSize	:: XDisplay -> Int
+xDisplayPixmapFormats		:: XDisplay -> [XPixmapFormat]
+xDisplayProtocolMajorVersion	:: XDisplay -> Int
+xDisplayProtocolMinorVersion	:: XDisplay -> Int
+xDisplayResourceIdBase		:: XDisplay -> Int
+xDisplayResourceIdMask		:: XDisplay -> Int 
+xDisplayRoots 			:: XDisplay -> [XScreen] 
+xDisplayVendorName		:: XDisplay -> String 
+xDisplayReleaseNumber		:: XDisplay -> Int
+
+-- output buffer
+
+xDisplayAfterFunction		:: XDisplay -> XMaybe (IO ())
+xSetDisplayAfterFunction 	:: XDisplay -> XMaybe (IO ()) -> IO ()
+xDisplayForceOutput 		:: XDisplay -> IO ()
+xDisplayFinishOutput		:: XDisplay -> IO ()
+
+-- close
+
+xCloseDisplay 			:: XDisplay -> IO ()
+
+-- SCREENS
+
+xScreenBackingStores		:: XScreen -> XBackingStore
+xScreenBlackPixel		:: XScreen -> XPixel
+xScreenDefaultColormap		:: XScreen -> XColormap
+xScreenDepths			:: XScreen -> [(Int, [XVisualInfo])]
+xScreenEventMaskAtOpen		:: XScreen -> XEventMask
+xScreenSize			:: XScreen -> XSize 
+xScreenMMSize 			:: XScreen -> XSize 
+xScreenMaxInstalledMaps		:: XScreen -> Int 
+xScreenMinInstalledMaps		:: XScreen -> Int 
+xScreenRoot			:: XScreen -> XWindow 
+xScreenRootDepth		:: XScreen -> Int
+xScreenRootVisual		:: XScreen -> Int
+xScreenSaveUndersP		:: XScreen -> Bool 
+xScreenWhitePixel		:: XScreen -> XPixel
+
+-- WINDOWS AND PIXMAPS
+
+-- drawables
+
+xDrawableDisplay	:: XDrawable -> XDisplay
+xDrawableEqual		:: XDrawable -> XDrawable -> Bool
+xDrawableId		:: XDrawable -> Int
+
+-- creating windows
+
+xCreateWindow 		:: XWindow 		-- parent
+			-> XRect		-- (x,y,width,height)
+			-> [XWinAttribute] 	-- optional arguments
+			-> IO XWindow
+
+-- window attributes
+
+xWindowBorderWidth 	:: XWindow -> IO Int 
+xSetWindowBorderWidth 	:: XWindow -> Int -> IO ()
+
+xDrawableDepth		:: XDrawable -> Int
+
+xDrawableSize 		:: XDrawable -> IO XSize 
+xDrawableResize 	:: XDrawable -> XSize -> IO ()
+
+xWindowPos 		:: XWindow -> IO XPoint 
+xWindowMove 		:: XWindow -> XPoint -> IO ()
+
+xWindowAllEventMasks	:: XWindow -> IO XEventMask
+xSetWindowBackground 	:: XWindow -> XFillContent -> IO ()
+
+xWindowBackingPixel 	:: XWindow -> IO XPixel 
+xSetWindowBackingPixel 	:: XWindow -> XPixel -> IO ()
+
+xWindowBackingPlanes 	:: XWindow -> IO XPixel 
+xSetWindowBackingPlanes	:: XWindow -> XPixel -> IO ()
+
+xWindowBackingStore 	:: XWindow -> IO XBackingStore
+xSetWindowBackingStore 	:: XWindow -> XBackingStore -> IO ()
+
+xWindowBitGravity	:: XWindow -> IO XGravity
+xSetWindowBitGravity	:: XWindow -> XGravity -> IO ()
+
+xSetWindowBorder 	:: XWindow -> XFillContent -> IO ()
+
+xWindowClass 		:: XWindow -> XWindowClass 
+
+xWindowColorMap 	:: XWindow -> IO (XMaybe XColormap)
+xSetWindowColorMap 	:: XWindow -> XColormap -> IO ()
+xWindowColormapInstalledP :: XWindow -> IO Bool
+
+xSetWindowCursor 	:: XWindow -> (XMaybe XCursor) -> IO () 
+
+xWindowDisplay 		:: XWindow -> XDisplay
+
+xWindowDoNotPropagateMask	:: XWindow -> IO XEventMask
+xSetWindowDoNotPropagateMask	:: XWindow -> XEventMask -> IO ()
+
+xWindowEqual		:: XWindow -> XWindow -> Bool
+
+xWindowEventMask	:: XWindow -> IO XEventMask
+xSetWindowEventMask	:: XWindow -> XEventMask -> IO ()
+
+xWindowGravity		:: XWindow -> IO XGravity
+xSetWindowGravity	:: XWindow -> XGravity -> IO ()
+
+xWindowId		:: XWindow -> Int
+
+xWindowMapState		:: XWindow -> IO XMapState
+
+xWindowOverrideRedirect		:: XWindow -> IO XSwitch
+xSetWindowOverrideRedirect	:: XWindow -> XSwitch -> IO ()
+
+xSetWindowPriority	:: XWindow -> XWindowStackMode -> IO ()
+
+xWindowSaveUnder	:: XWindow -> IO XSwitch
+xSetWindowSaveUnder	:: XWindow -> XSwitch -> IO ()
+
+xWindowVisual		:: XWindow -> Int
+
+-- stacking order
+
+xCirculateWindowDown	:: XWindow -> IO () 
+xCirculateWindowUp	:: XWindow -> IO ()
+
+-- window hierarchy
+
+xDrawableRoot		:: XDrawable -> IO XWindow
+xQueryTree		:: XWindow -> IO ([XWindow], 	-- children
+				         XMaybe XWindow,-- parent
+				         XWindow) 	-- root
+
+xReparentWindow		:: XWindow 			-- window
+			-> XWindow 			-- parent
+			-> XPoint 			-- (x,y)
+			-> IO ()
+
+xTranslateCoordinates	:: XWindow 			-- source
+			-> XPoint 			-- (source-x,source-y)
+			-> XWindow 			-- destination
+			-> IO (XMaybe XPoint)		-- (dest-x,dest-y)
+
+-- mapping windows
+
+xMapWindow 		:: XWindow -> IO () 
+xMapSubwindows 		:: XWindow -> IO ()
+xUnmapWindow		:: XWindow -> IO () 
+xUnmapSubwindows	:: XWindow -> IO ()
+
+-- destroying windows
+
+xDestroyWindow		:: XWindow -> IO () 
+xDestroySubwindows	:: XWindow -> IO ()
+
+-- pixmaps
+
+xCreatePixmap 		:: XSize 			-- (width,height)
+			-> Int 				-- depth
+			-> XDrawable 			-- drawable
+			-> IO XPixmap 
+
+xFreePixmap 		:: XPixmap -> IO ()
+
+xPixmapDisplay		:: XPixmap -> XDisplay
+xPixmapEqual		:: XPixmap -> XPixmap -> Bool
+
+-- GRAPHICS CONTEXTS
+
+xCreateGcontext		:: XDrawable 			-- drawable
+			-> [XGCAttribute] 		-- optional arguments
+			-> IO XGcontext
+
+xUpdateGcontext 	:: XGcontext 			-- old gcontext
+			-> [XGCAttribute] 		-- changes
+			-> IO ()			-- new gcontext
+
+xFreeGcontext		:: XGcontext -> IO ()
+
+xGcontextDisplay	:: XGcontext -> XDisplay
+xGcontextEqual		:: XGcontext -> XGcontext -> Bool
+
+xGcontextId		:: XGcontext -> Int
+
+xQueryBestStipple	:: XSize -> XDrawable -> XSize
+xQueryBestTile		:: XSize -> XDrawable -> XSize
+
+xCopyGcontext		:: XGcontext 			-- source
+			-> XGcontext			-- destination
+			-> IO ()
+
+-- GRAPHICS OPERATIONS
+
+xClearArea 		:: XWindow 			-- window
+			-> XRect 			-- (x,y,width,height)
+			-> Bool 			-- exposure-p
+			-> IO ()
+
+xCopyArea		:: XDrawable 			-- source
+			-> XGcontext 			-- gcontext
+			-> XRect 			-- (src-x,src-y,w,h)
+			-> XDrawable			-- destination
+			-> XPoint 			-- (dest-x,dest-y)
+			-> IO ()
+
+xCopyPlane		:: XDrawable 			-- source
+			-> XGcontext 			-- gcontext
+			-> XPixel 			-- plane
+			-> XRect			-- (src-x,src-y,w,h)
+                        -> XDrawable 			-- destination
+			-> XPoint 			-- (dest-x,dest-y)
+			-> IO ()
+
+xDrawPoint		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XPoint 			-- (x,y)
+			-> IO ()
+
+xDrawPoints		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> [XPoint]			-- points
+			-> IO ()
+
+xDrawLine 		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XPoint 			-- (x1,y1)
+			-> XPoint 			-- (x2,y2)
+			-> IO ()
+
+xDrawLines 		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> [XPoint] 			-- points
+			-> Bool 			-- fill-p
+			-> IO ()
+
+xDrawSegments		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> [(XPoint,XPoint)]		-- segments
+			-> IO ()
+
+xDrawRectangle 		:: XDrawable 			-- drawable
+			-> XGcontext			-- gcontext
+			-> XRect 			-- (x,y,width,height)
+			-> Bool 			-- fill-p
+			-> IO ()
+
+xDrawRectangles 	:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> [XRect] 			-- rectangles
+			-> Bool 			-- fill-p
+			-> IO ()
+
+xDrawArc		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XArc 			-- (x,y,w,h,a1,a2)
+			-> Bool 			-- fill-p
+			-> IO ()
+
+xDrawArcs		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> [XArc] 			-- arcs
+			-> Bool 			-- fill-p
+			-> IO ()
+
+xDrawGlyph		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XPoint 			-- (x,y)
+			-> Char 			-- element
+			-> IO (XMaybe Int)		-- width
+
+xDrawGlyphs		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XPoint 			-- (x,y)
+			-> String			-- sequence
+			-> IO (XMaybe Int)		-- width
+
+xDrawImageGlyph		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XPoint 			-- (x,y)
+			-> Char 			-- element
+			-> IO (XMaybe Int)		-- width
+
+xDrawImageGlyphs	:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XPoint 			-- (x,y)
+			-> String 			-- sequence
+			-> IO (XMaybe Int)		-- width
+
+-- IMAGES
+
+xImageBlueMask		:: XImage -> XMaybe XPixel 
+xImageDepth 		:: XImage -> Int 
+xImageGreenMask		:: XImage -> XMaybe XPixel
+xImageSize		:: XImage -> XSize 
+xImageName		:: XImage -> String 
+xSetImageName		:: XImage -> String -> IO () 
+xImageRedMask		:: XImage -> XMaybe XPixel
+xImageHotSpot		:: XImage -> XMaybe XPoint
+xSetImageHotSpot	:: XImage -> XPoint -> IO ()
+
+-- XY-format images
+
+xImageXYBitmaps		:: XImage -> IO [XBitmap]
+xSetImageXYBitmaps	:: XImage -> [XBitmap] -> IO ()
+
+-- Z-format images
+
+xImageZBitsPerPixel	:: XImage -> IO Int
+xsetImageZBitsPerPixel	:: XImage -> Int -> IO ()
+xImageZPixarray		:: XImage -> IO XPixarray
+xSetImageZPixarray	:: XImage -> XPixarray -> IO ()
+
+-- image functions
+
+xCreateImage		:: [XImAttribute] -> IO XImage
+xCopyImage		:: XImage 			-- image
+			-> XRect 			-- (x,y,width,height)
+			-> XImageType 			-- result-type
+			-> XImage			-- new-image
+
+xGetImage		:: XDrawable 			-- drawable
+			-> XRect 			-- (x,y,width,height)
+			-> XPixel 			-- plane-mask
+			-> XImageFormat 		-- format
+			-> XImageType 			-- result-type
+			-> IO XImage			-- image
+
+xPutImage		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XImage 			-- ximage
+			-> XPoint 			-- (src-x,src-y)
+			-> XRect			-- (x,y,width,height)
+                        -> IO ()
+
+-- image files
+
+xReadBitmapFile		:: String 			-- pathname
+			-> IO XImage 
+
+xWriteBitmapFile	:: String 			-- pathname
+			-> XImage -> IO ()
+
+-- direct image transfer
+
+xGetRawImage		:: XDrawable 			-- drawable
+			-> XRect 			-- (x,y,width,height)
+			-> XPixel 			-- plane-mask
+			-> XImageFormat 		-- format
+			-> IO XImageData		-- data
+
+xPutRawImage		:: XDrawable 			-- drawable
+			-> XGcontext 			-- gcontext
+			-> XImageData 			-- data
+			-> Int 				-- depth
+			-> XRect			-- (x,y,width,height)
+			-> Int 				-- left-pad
+			-> XImageFormat 		-- format
+			-> IO ()
+
+-- FONTS
+
+-- opening fonts
+
+xOpenFont		:: XDisplay -> String -> IO XFont
+xCloseFont		:: XFont -> IO () 
+xDiscardFontInfo	:: XFont -> IO ()
+
+-- listing fonts
+
+xFontPath		:: XDisplay -> IO [String]
+xListFontNames		:: XDisplay -> String 		-- pattern
+			-> IO [String] 
+xListFonts		:: XDisplay -> String 		-- pattern
+			-> IO [XFont]
+
+-- font attriburtes
+
+xFontAllCharExistsP	:: XFont -> Bool 
+xFontAscent		:: XFont -> Int 
+xFontDefaultChar	:: XFont -> Int
+xFontDescent		:: XFont -> Int 
+xFontDirection		:: XFont -> XDrawDirection 
+xFontDisplay		:: XFont -> XDisplay
+xFontEqual		:: XFont -> XFont -> Int
+xFontId			:: XFont -> Int
+
+xFontMaxByte1		:: XFont -> Int 
+xFontMaxByte2		:: XFont -> Int 
+xFontMaxChar		:: XFont -> Int
+xFontMinByte1		:: XFont -> Int 
+xFontMinByte2		:: XFont -> Int 
+xFontMinChar		:: XFont -> Int
+
+xFontName		:: XFont -> String
+
+xFontMaxCharAscent	:: XFont -> Int 
+xFontMaxCharAttributes	:: XFont -> Int 
+xFontMaxCharDescent	:: XFont -> Int
+xFontMaxCharLeftBearing	:: XFont -> Int
+xFontMaxCharRightBearing	:: XFont -> Int
+xFontMaxCharWidth	:: XFont -> Int 
+xFontMinCharAscent	:: XFont -> Int 
+xFontMinCharAttributes	:: XFont -> Int
+xFontMinCharDescent	:: XFont -> Int 
+xFontMinCharLeftBearing	:: XFont -> Int 
+xFontMinCharRightBearing	:: XFont -> Int
+xFontMinCharWidth	:: XFont -> Int
+
+-- char attributes
+
+xCharAscent		:: XFont -> Int -> XMaybe Int
+xCharAttributes		:: XFont -> Int -> XMaybe Int
+xCharDescent		:: XFont -> Int -> XMaybe Int
+xCharLeftBearing	:: XFont -> Int -> XMaybe Int
+xCharRightBearing	:: XFont -> Int -> XMaybe Int
+xCharWidth		:: XFont -> Int -> XMaybe Int
+
+-- querying text size
+
+xTextWidth		:: XFont 			-- font
+			-> String 			-- sequence
+			-> Int				-- width
+
+-- COLORS
+
+-- creating colormaps
+
+xCreateColormap		:: XVisualInfo 			-- visual
+			-> XWindow 			-- window
+			-> Bool 			-- alloc-p
+			-> IO XColormap
+
+xCopyColormapAndFree	:: XColormap -> IO XColormap
+xFreeColormap		:: XColormap -> IO ()
+
+-- installing colormaps
+
+xInstallColormap	:: XColormap -> IO ()
+xInstalledColormaps	:: XWindow -> IO [XColormap]
+xUnInstallColormap	:: XColormap -> IO ()
+
+-- allocating colors
+
+xAllocColor		:: XColormap -> XColor
+			-> IO (XPixel, 			-- pixel
+			       XColor, 			-- screen-color
+			       XColor)			-- exact-color
+
+xAllocColorCells	:: XColormap 			-- pixel
+			-> Int 				-- colors
+			-> Int 				-- planes
+			-> Bool 			-- contiguous
+			-> IO ([XPixel], 		-- pixels
+			       [XPixel])		-- mask
+
+xAllocColorPlanes	:: XColormap 			-- colormap
+			-> Int 				-- colors
+			-> Int 				-- reds
+			-> Int 				-- greens
+			-> Int 				-- blues
+			-> Bool 			-- contiguous-p
+			-> IO ([XPixel], 		-- pixel
+			       XPixel, 			-- red-mask
+			       XPixel, 			-- green-mask
+			       XPixel)			-- blue-mask
+
+xFreeColors		:: XColormap -> [XPixel] 	-- pixels
+			-> XPixel 			-- plane-mask
+			-> IO ()
+
+-- finding colors
+
+xLookupColor		:: XColormap -> String 		-- name
+			-> IO (XColor, 			-- screen-color
+			       XColor)			-- exact-color
+
+xQueryColors		:: XColormap -> [XPixel] 	-- pixels
+			-> IO [XColor]
+
+-- changing colors
+
+xStoreColor		:: XColormap -> XPixel 		-- pixel
+			-> XColor 			-- color
+			-> IO ()
+
+xStoreColors		:: XColormap 			-- colormap
+			-> [(XPixel, XColor)] 		-- pixel-colors
+			-> IO ()
+
+-- colormap attributes
+
+xColormapDisplay	:: XColormap -> XDisplay
+xColormapEqual		:: XColormap -> XColormap -> Bool
+
+-- CURSORS
+
+xCreateCursor		:: XPixmap 			-- source
+			-> (XMaybe XPixmap) 		-- mask
+			-> XPoint 			-- (x,y)
+			-> XColor 			-- foreground
+			-> XColor 			-- background
+			-> IO XCursor
+
+xCreateGlyphCursor	:: (XFont, char) 		-- (src-font,src-char)
+			-> (XMaybe (XFont, Char)) 	-- (mask-font,mask-char)
+			-> XColor			-- foreground
+			-> XColor 			-- background
+			-> IO XCursor
+
+xFreeCursor		:: XCursor -> IO ()
+
+xQueryBestCursor	:: XSize 			-- (width,height)
+			-> XDisplay -> IO XSize
+
+xRecolorCursor		:: XCursor -> XColor 		-- foreground
+			-> XColor 			-- background
+			-> IO ()
+
+xCursorDisplay		:: XCursor -> XDisplay
+xCursorEqual		:: XCursor -> XCursor -> Bool
+
+-- ATOMS, PROPERTIES, AND SELECTIONS
+
+-- atoms
+
+xAtomName		:: XDisplay -> Int 		-- atom-id
+			-> XAtom
+
+xFindAtom		:: XDisplay -> XAtom 		-- atom-name
+			-> IO (XMaybe Int)
+
+xInternAtom		:: XDisplay -> XAtom 		-- atom-name
+			-> IO (XMaybe Int)
+
+-- properties
+
+xChangeProperty		:: XWindow 			-- window
+			-> XAtom 			-- property
+			-> XProperty 			-- (data,type,format)
+			-> IO ()
+
+xDeleteProperty		:: XWindow -> XAtom -> IO ()
+xGetProperty		:: XWindow			-- window
+			-> XAtom 			-- property
+			-> IO XProperty			-- (data,type,format)
+
+xListProperties		:: XWindow -> IO [XAtom]
+xRotateProperties	:: XWindow 			-- window
+			-> [XAtom] 			-- properties
+			-> Int 				-- delta
+			-> IO ()
+
+-- selections
+
+xConvertSelection	:: XAtom 			-- selection
+			-> XAtom 			-- type
+			-> XWindow 			-- requester
+			-> XAtom			-- property
+			-> (XMaybe XTime) 		-- time
+			-> IO ()
+
+xSelectionOwner		:: XDisplay 			-- display
+			-> XAtom 			-- selection
+			-> IO (XMaybe XWindow)
+
+xSetSelectionOwner	:: XDisplay 			-- display
+			-> XAtom 			-- selection
+			-> (XMaybe XTime) 		-- time
+			-> XWindow 			-- owner
+			-> IO ()
+
+-- EVENT
+
+-- Wait for the next event 
+
+xGetEvent		:: XDisplay -> IO XEvent
+
+-- managing the event queue 
+
+xQueueEvent		:: XDisplay -> XEvent -> Bool	-- append-p
+			-> IO ()
+
+xEventListen		:: XDisplay -> IO Int 		-- # of events in queue
+
+-- sending events 
+
+xSendEvent		:: XWindow 			-- window
+			-> XEvent 			-- event key and slots
+			-> XEventMask 			-- event-mask
+			-> IO ()
+
+-- pointer position
+
+xGlobalPointerPosition	:: XDisplay -> IO XPoint
+xPointerPosition	:: XWindow -> IO (XMaybe XPoint)
+xMotionEvents		:: XWindow -> XTime -> XTime -> IO [XPoint]
+xWarpPointer		:: XWindow -> XPoint -> IO ()
+
+-- keyboard input focus
+
+xSetInputFocus		:: XDisplay 			-- display
+			-> XInputFocus 			-- focus
+			-> XInputFocus			-- revert-to
+			-> (XMaybe XTime) 		-- time
+			-> IO ()
+
+xInputFucus		:: XDisplay -> IO (XInputFocus,	-- focus
+					   XInputFocus)	-- revert-to
+
+-- grabbing the pointer
+
+xGrabPointer		:: XWindow 			-- window
+			-> XEventMask			-- event-mask
+			-> [XGrabAttribute] 		-- optional attributes
+			-> XMaybe XTime 		-- time
+			-> IO XGrabStatus
+
+xUngrabPointer		:: XDisplay -> XMaybe XTime -> IO ()
+
+xChangeActivePointerGrab :: XDisplay -> XEventMask 	-- event-mask
+			 -> [XGrabAttribute] 		-- cursor
+			 -> XMaybe XTime -> IO ()
+
+-- grabbing a button
+
+xGrabButton		:: XWindow 			-- window
+			-> Int 				-- button
+			-> XEventMask 			-- event-mask
+			-> XStateMask 			-- modifiers
+			-> [XGrabAttribute]		-- optional attributes
+			-> IO ()
+
+xUngrabButton		:: XWindow -> Int 		-- button
+			-> XStateMask 			-- modifiers
+			-> IO ()
+
+-- grabbing the keyboard
+
+xGrabKeyboard		:: XWindow 			-- window
+			-> [XGrabAttribute] 		-- optional attributes
+			-> XMaybe XTime			-- time
+			-> IO XGrabStatus
+
+xUngrabkeyboard		:: XDisplay -> XMaybe XTime -> IO ()
+
+-- grabbing a key
+
+xGrabKey		:: XWindow 			-- window
+			-> Int 				-- key
+			-> XStateMask			-- modifiers
+			-> [XGrabAttribute] 		-- optional attributes
+			-> IO ()
+
+xUngrabKey		:: XWindow -> Int -> XStateMask -- modifiers
+			-> IO ()
+
+-- CONTROL FUNCTIONS
+
+-- grabbing the server
+
+xGrabServer		:: XDisplay -> IO ()
+xUngrabServer		:: XDisplay -> IO ()
+
+-- pointer control
+
+xSetPointerAcceleration	:: XDisplay -> Float -> IO ()
+xSetPointerThreshold	:: XDisplay -> Float -> IO ()
+xPointerAcceleration	:: XDisplay -> IO Float
+xPointerThreshold	:: XDisplay -> IO Float 
+xSetPointerMapping	:: XDisplay -> [Int] -> IO ()
+xPointerMapping		:: XDisplay -> IO [Int]
+
+-- keyboard control
+
+xBell			:: XDisplay -> Int -> IO ()
+
+xSetKeyboardKeyClickPercent	:: XDisplay -> Int -> IO ()
+xSetKeyboardBellPercent		:: XDisplay -> Int -> IO ()
+xSetKeyboardBellPitch		:: XDisplay -> Int -> IO ()
+xSetKeyboardBellDuration	:: XDisplay -> Int -> IO ()
+xSetKeyboardLed			:: XDisplay -> Integer -> IO ()
+xSetKeyboardAutoRepeatMode	:: XDisplay -> XBitVec -> IO ()
+
+xKeyboardKeyClickPercent	:: XDisplay -> IO Int
+xKeyboardBellPercent		:: XDisplay -> IO Int
+xKeyboardBellPitch		:: XDisplay -> IO Int
+xKeyboardBellDuration		:: XDisplay -> IO Int
+
+xKeyboardLed			:: XDisplay -> IO Integer
+xKeyboardAutoRepeatMode		:: XDisplay -> IO XBitVec
+
+xModifierMapping		:: XDisplay -> IO [[Int]]
+xSetModifierMapping		:: XDisplay -> [[Int]] -> IO (XMaybe ()) 
+xQueryKeymap			:: XDisplay -> IO XBitVec
+
+-- keyboard mapping
+
+xChangeKeyboardMapping 		:: XDisplay 		-- display
+				-> XKeysymTable 	-- keysyms
+				-> IO ()
+
+xKeyboardMapping		:: XDisplay 		-- display
+				-> IO XKeysymTable	-- mappings
+
+xKeycodeKeysym			:: XDisplay 		-- display
+				-> Int 			-- keycode
+				-> Int 			-- keysym-index
+				-> IO XKeysym
+
+xKeysymCharacter		:: XDisplay 		-- display
+				-> XKeysym               -- keysym
+				-> XStateMask		-- state
+				-> IO (XMaybe Char)
+
+xKeycodeCharacter		:: XDisplay 		-- display
+				-> Int                  -- keycode
+				-> XStateMask		-- state
+				-> IO (XMaybe Char)
+
+-- client termination
+
+xAddToSaveSet		:: XWindow -> IO ()
+xCloseDownMode		:: XDisplay -> IO XCloseDownMode
+xSetCloseDownMode	:: XDisplay -> XCloseDownMode -> IO ()
+xKillClient		:: XDisplay -> Int -> IO ()
+xKillTemporaryClients	:: XDisplay -> IO ()
+xRemoveFromSaveSet	:: XWindow -> IO ()
+
+-- managing host access
+
+xAccessControl		:: XDisplay -> IO Bool
+xSetAccessControl	:: XDisplay -> Bool -> IO ()
+xAccessHosts		:: XDisplay -> IO [String]
+xAddAccessHost		:: XDisplay -> String -> IO ()
+xRemoveAccessHost	:: XDisplay -> String -> IO ()
+
+-- screen saver
+
+xActivateScreenSaver	:: XDisplay -> IO ()
+xResetScreenSaver	:: XDisplay -> IO ()
+
+xScreenSaver		:: XDisplay -> IO XScreenSaver
+xSetScreenSaver		:: XDisplay -> XScreenSaver -> IO ()
+
+{-#
+
+
+xHandleError		:: LispName("x-handle-error")
+xError			:: LispName("xlib::x-error")
+
+xEventType 		:: LispName("sel-event-type")
+
+xEventWindow 		:: LispName ("x-event-window")
+xEventEventWindow	:: LispName ("x-event-event-window")
+xEventCode		:: LispName ("x-event-code")
+xEventPos		:: LispName ("x-event-pos")
+xEventState		:: LispName ("x-event-state")
+xEventTime		:: LispName ("x-event-time")
+xEventRoot		:: LispName ("x-event-root")
+xEventRootPos		:: LispName ("x-event-root-pos")
+xEventChild		:: LispName ("x-event-child")
+xEventSameScreenP	:: LispName ("x-event-same-screen-p")
+xEventHintP		:: LispName ("x-event-hint-p")
+xEventMode		:: LispName ("x-event-mode")
+xEventKind		:: LispName ("x-event-kind")
+xEventFocusP		:: LispName ("x-event-focus-p")
+xEventKeymap		:: LispName ("x-event-keymap")
+xEventRequest		:: LispName ("x-event-request")
+xEventStart		:: LispName ("x-event-start")
+xEventCount		:: LispName ("x-event-count")
+xEventRect		:: LispName ("x-event-rect")
+xEventDrawable		:: LispName ("x-event-drawable")
+xEventXGraphFun		:: LispName ("x-event-graph-fun")
+xEventPlace		:: LispName ("x-event-place")
+xEventBorderWidth	:: LispName ("x-event-border-width")
+xEventAboveSibling	:: LispName ("x-event-above-sibling")
+xEventOverrideRedirectP	:: LispName ("x-event-override-redirect-p")
+xEventParent		:: LispName ("x-event-parent")
+xEventConfigureP	:: LispName ("x-event-configure-p")
+xEventVisibility	:: LispName ("x-event-state")
+xEventNewP		:: LispName ("x-event-new-p")
+xEventInstalledP	:: LispName ("x-event-installed-p")
+xEventStackMode		:: LispName ("x-event-stack-mode")
+xEventValueMask		:: LispName ("x-event-value-mask")
+xEventSize		:: LispName ("x-event-size")
+xEventMessage		:: LispName ("x-event-message")
+xEventPropertyState	:: LispName ("x-event-state")
+xEventAtom		:: LispName ("x-event-atom")
+xEventSelection		:: LispName ("x-event-selection")
+xEventTarget		:: LispName ("x-event-target")
+xEventProperty		:: LispName ("x-event-property")
+xEventRequestor		:: LispName ("x-event-requestor")
+
+
+xSetEventMaskKey 	:: LispName ("x-set-event-mask-key")
+xClearEventMaskKey 	:: LispName ("x-clear-event-mask-key")
+xTestEventMaskKey 	:: LispName ("x-test-event-mask-key")
+
+xSetStateMaskKey 	:: LispName ("x-set-state-mask-key")
+xClearStateMaskKey 	:: LispName ("x-clear-state-mask-key")
+xTestStateMaskKey 	:: LispName ("x-test-state-mask-key")
+
+-- DISPLAYS
+
+-- open
+
+xOpenDisplay      		:: LispName("x-open-display")
+
+-- display attributes
+
+xDisplayAuthorizationData	:: LispName("xlib:display-authorization-data")
+xDisplayAuthorizationName	:: LispName("xlib:display-authorization-name")
+xDisplayBitmapFormat		:: LispName("xlib:display-bitmap-format")
+xDisplayByteOrder		:: LispName("xlib:display-byte-order")
+xDisplayDisplay           	:: LispName("xlib:display-display")
+xSetDisplayErrorHandler		:: LispName("x-set-display-error-handler")
+xDisplayImageLsbFirstP		:: LispName("xlib:display-image-lsb-first-p")
+xDisplayMaxKeycode		:: LispName("xlib:display-max-keycode")
+xDisplayMaxRequestLength	:: LispName("xlib:display-max-request-length")
+xDisplayMinKeycode		:: LispName("xlib:display-min-keycode")
+xDisplayMotionBufferSize	:: LispName("xlib:display-motion-buffer-size")
+xDisplayPixmapFormats		:: LispName("xlib:display-pixmap-formats")
+xDisplayProtocolMajorVersion :: LispName("xlib:display-protocol-major-version")
+xDisplayProtocolMinorVersion :: LispName("xlib:display-protocol-minor-version")
+xDisplayResourceIdBase		:: LispName("xlib:display-resource-id-base")
+xDisplayResourceIdMask		:: LispName("xlib:display-resource-id-mask")
+xDisplayRoots     		:: LispName("xlib:display-roots")
+xDisplayVendorName		:: LispName("xlib:display-vendor-name")
+xDisplayReleaseNumber		:: LispName("xlib:display-release-number")
+
+-- output buffer
+
+xDisplayAfterFunction    	:: LispName("xlib:display-after-function")
+xSetDisplayAfterFunction    	:: LispName("x-set-display-after-function")
+xDisplayForceOutput      	:: LispName("xlib:display-force-output")
+xDisplayFinishOutput      	:: LispName("xlib:display-finish-output")
+
+-- close
+
+xCloseDisplay     		:: LispName("xlib:close-display")
+
+-- SCREENS
+
+xScreenBackingStores		:: LispName("xlib:screen-backing-stores")
+xScreenBlackPixel		:: LispName("xlib:screen-black-pixel")
+xScreenDefaultColormap		:: LispName("xlib:screen-default-colormap")
+xScreenDepths			:: LispName("x-screen-depths")
+xScreenEventMaskAtOpen		:: LispName("xlib:screen-event-mask-at-open")
+xScreenSize			:: LispName("x-screen-size")
+xScreenMMSize                   :: LispName("x-screen-mmsize")
+xScreenMaxInstalledMaps		:: LispName("xlib:screen-max-installed-maps")
+xScreenMinInstalledMaps		:: LispName("xlib:screen-min-installed-maps")
+xScreenRoot                     :: LispName("xlib:screen-root")
+xScreenRootDepth		:: LispName("xlib:screen-root-depth")
+xScreenRootVisual		:: LispName("xlib:screen-root-visual")
+xScreenSaveUndersP		:: LispName("xlib:screen-save-unders-p")
+xScreenWhitePixel 		:: LispName("xlib:screen-white-pixel")
+
+-- WINDOWS AND PIXMAPS
+
+-- drawables
+
+xDrawableDisplay	:: LispName("xlib:drawable-display")
+xDrawableEqual		:: LispName("xlib:drawable-equal")
+xDrawableId		:: LispName("xlib:drawable-id")
+
+-- creating windows
+
+xCreateWindow           :: LispName("x-create-window")
+
+-- window attributes
+
+xWindowBorderWidth      :: LispName("xlib:drawable-border-width")
+xSetWindowBorderWidth   :: LispName("x-set-drawable-border-width")
+
+xDrawableDepth		:: LispName("xlib:drawable-depth")
+
+xDrawableSize           :: LispName("x-drawable-size")
+xDrawableResize         :: LispName("x-drawable-resize")
+
+xWindowPos              :: LispName("x-window-pos")
+xWindowMove             :: LispName("x-window-move")
+
+xWindowAllEventMasks	:: LispName("xlib:window-all-event-masks")
+
+xSetWindowBackground    :: LispName("x-set-window-background")
+
+xWindowBackingPixel     :: LispName("xlib:window-backing-pixel")
+xSetWindowBackingPixel  :: LispName("x-set-window-backing-pixel")
+
+xWindowBackingPlanes    :: LispName("xlib:window-backing-planes")
+xSetWindowBackingPlanes :: LispName("x-set-window-backing-planes")
+
+xWindowBackingStore     :: LispName("xlib:window-backing-store")
+xSetWindowBackingStore  :: LispName("x-set-window-backing-store")
+
+xWindowBitGravity	:: LispName("xlib:window-bit-gravity")
+xSetWindowBitGravity	:: LispName("x-set-window-bit-gravity")
+
+xSetWindowBorder        :: LispName("x-set-window-border")
+
+xWindowClass            :: LispName("xlib:window-class")
+
+xWindowColorMap         :: LispName("xlib:window-colormap")
+xSetWindowColorMap      :: LispName("x-set-window-colormap")
+xWindowColormapInstalledP :: LispName("xlib:window-colormap-installed-p")
+
+xSetWindowCursor        :: LispName("x-set-window-cursor")
+
+xWindowDisplay          :: LispName("xlib:window-display")
+
+xWindowDoNotPropagateMask    :: LispName("xlib:window-do-not-propagate-mask")
+xSetWindowDoNotPropagateMask :: LispName("x-set-window-do-not-propagate-mask")
+
+xWindowEqual		:: LispName("xlib:window-equal")
+
+xWindowEventMask	:: LispName("xlib:window-event-mask")
+xSetWindowEventMask	:: LispName("x-set-window-event-mask")
+
+xWindowGravity		:: LispName("xlib:window-gravity")
+xSetWindowGravity	:: LispName("x-set-window-gravity")
+
+xWindowId		:: LispName("xlib:window-id")
+
+xWindowMapState		:: LispName("xlib:window-map-state")
+
+xWindowOverrideRedirect		:: LispName("xlib:window-override-redirect")
+xSetWindowOverrideRedirect	:: LispName("x-set-window-override-redirect")
+
+xSetWindowPriority	:: LispName("x-set-window-priority")
+
+xWindowSaveUnder	:: LispName("xlib:window-save-under")
+xSetWindowSaveUnder	:: LispName("x-set-window-save-under")
+xWindowVisual		:: LispName("xlib:window-visual")
+
+-- stacking order
+
+xCirculateWindowDown	:: LispName("xlib:circulate-window-down")
+xCirculateWindowUp	:: LispName("xlib:circulate-window-up")
+
+-- window hierarchy
+
+xDrawableRoot		:: LispName("xlib:drawable-root")
+xQueryTree		:: LispName("x-query-tree")
+
+xReparentWindow		:: LispName("x-reparent-window")
+
+xTranslateCoordinates	:: LispName("x-translate-coordinates")
+
+-- mapping windows
+
+xMapWindow              :: LispName("xlib:map-window")
+xMapSubwindows          :: LispName("xlib:map-subwindows")
+xUnmapWindow		:: LispName("xlib:unmap-window")
+xUnmapSubwindows	:: LispName("xlib:unmap-subwindows")
+
+-- destroying windows
+
+xDestroyWindow		:: LispName("xlib:destroy-window")
+xDestroySubwindows	:: LispName("xlib:destroy-subwindows")
+
+-- pixmaps
+
+xCreatePixmap           :: LispName("x-create-pixmap")
+xFreePixmap             :: LispName("xlib:free-pixmap")
+xPixmapDisplay		:: LispName("xlib:pixmap-display")
+xPixmapEqual		:: LispName("xlib:pixmap-equal")
+
+-- GRAPHICS CONTEXTS
+
+xCreateGcontext   	:: LispName("x-create-gcontext")
+xUpdateGcontext	  	:: LispName("x-update-gcontext")
+xFreeGcontext     	:: LispName("xlib:free-gcontext")
+
+xGcontextDisplay	:: LispName("xlib:gcontext-display")
+xGcontextEqual		:: LispName("xlib:gcontext-equal")
+
+xGcontextId		:: LispName("xlib:gcontext-id")
+
+xQueryBestStipple	:: LispName("x-query-best-stipple")
+xQueryBestTile		:: LispName("x-query-best-tile")
+
+xCopyGcontext		:: LispName("xlib:copy-gcontext")
+
+-- GRAPHICS OPERATIONS
+
+xClearArea		:: LispName("x-clear-area")
+xCopyArea		:: LispName("x-copy-area")
+xCopyPlane		:: LispName("x-copy-plane")
+xDrawPoint		:: LispName("x-draw-point")
+xDrawPoints		:: LispName("x-draw-points")
+xDrawLine		:: LispName("x-draw-line")
+xDrawLines		:: LispName("x-draw-lines")
+xDrawSegments		:: LispName("x-draw-segments")
+xDrawRectangle		:: LispName("x-draw-rectangle")
+xDrawRectangles		:: LispName("x-draw-rectangles")
+xDrawArc		:: LispName("x-draw-arc")
+xDrawArcs		:: LispName("x-draw-arcs")
+xDrawGlyph		:: LispName("x-draw-glyph")
+xDrawGlyphs		:: LispName("x-draw-glyphs")
+xDrawImageGlyph		:: LispName("x-draw-image-glyph")
+xDrawImageGlyphs	:: LispName("x-draw-image-glyphs")
+
+-- IMAGES
+
+xImageBlueMask		:: LispName("xlib:image-blue-mask")
+xImageDepth 		:: LispName("xlib:image-depth")
+xImageGreenMask		:: LispName("xlib:image-green-mask")
+xImageSize		:: LispName("x-image-size")
+xImageName		:: LispName("x-image-name")
+xSetImageName		:: LispName("x-set-image-name")
+xImageRedMask		:: LispName("xlib:image-red-mask")
+xImageHotSpot		:: LispName("x-image-hot-spot")
+xSetImageHotSpot	:: LispName("x-set-image-hot-spot")
+
+-- XY-format images
+
+xImageXYBitmaps		:: LispName("xlib:image-xy-bitmap-list")
+xSetImageXYBitmaps	:: LispName("x-set-image-xy-bitmap-list")
+
+-- Z-format images
+
+xImageZBitsPerPixel	:: LispName("xlib:image-z-bits-per-pixel")
+xsetImageZBitsPerPixel	:: LispName("x-set-image-z-bits-per-pixel")
+xImageZPixarray		:: LispName("xlib:image-z-pixarray")
+xSetImageZPixarray	:: LispName("x-set-image-z-pixarray")
+
+-- image functions
+
+xCreateImage		:: LispName("x-create-image")
+xCopyImage		:: LispName("x-copy-image")
+xGetImage		:: LispName("x-get-image")
+xPutImage		:: LispName("x-put-image")
+
+-- image files
+
+xReadBitmapFile		:: LispName("xlib:read-bitmap-file")
+xWriteBitmapFile	:: LispName("xlib:write-bitmap-file")
+
+-- direct image transfer
+
+xGetRawImage		:: LispName("x-get-raw-image")	
+xPutRawImage		:: LispName("x-put-raw-image")	
+
+-- FONTS
+
+-- opening fonts
+
+xOpenFont		:: LispName ("xlib:open-font")
+xCloseFont		:: LispName ("xlib:close-font")
+xDiscardFontInfo	:: LispName ("xlib:discard-font-info")
+
+-- listing fonts
+
+xFontPath		:: LispName ("xlib:font-path")
+xListFontNames		:: LispName ("xlib:list-font-names")
+xListFonts		:: LispName ("xlib:list-fonts")
+
+-- font attriburtes
+
+xFontAllCharExistsP	:: LispName ("xlib:font-all-chars-exist-p")
+xFontAscent		:: LispName ("xlib:font-ascent")
+xFontDefaultChar	:: LispName ("xlib:font-default-char")
+xFontDescent		:: LispName ("xlib:font-descent")
+xFontDirection		:: LispName ("xlib:font-direction")
+xFontDisplay		:: LispName ("xlib:font-display")
+xFontEqual		:: LispName ("xlib:font-equal")
+xFontId			:: LispName ("xlib:font-id")
+
+xFontMaxByte1		:: LispName ("xlib:font-max-byte1")
+xFontMaxByte2		:: LispName ("xlib:font-max-byte2")
+xFontMaxChar		:: LispName ("xlib:font-max-char")
+xFontMinByte1		:: LispName ("xlib:font-min-byte1")
+xFontMinByte2		:: LispName ("xlib:font-min-byte2")
+xFontMinChar		:: LispName ("xlib:font-min-char")
+
+xFontName		:: LispName ("x-font-name")
+
+xFontMaxCharAscent	:: LispName ("xlib:max-char-ascent")
+xFontMaxCharAttributes	:: LispName ("xlib:max-char-attributes")
+xFontMaxCharDescent	:: LispName ("xlib:max-char-descent")
+xFontMaxCharLeftBearing	:: LispName ("xlib:max-char-left-bearing")
+xFontMaxCharRightBearing	:: LispName ("xlib:max-char-right-bearing")
+xFontMaxCharWidth	:: LispName ("xlib:max-char-width")
+xFontMinCharAscent	:: LispName ("xlib:min-char-ascent")
+xFontMinCharAttributes	:: LispName ("xlib:min-char-attributes")
+xFontMinCharDescent	:: LispName ("xlib:min-char-descent")
+xFontMinCharLeftBearing	:: LispName ("xlib:min-char-left-bearing")
+xFontMinCharRightBearing	:: LispName ("xlib:min-char-right-bearing")
+xFontMinCharWidth	:: LispName ("xlib:min-char-width")
+
+-- char attributes
+
+xCharAscent		:: LispName ("xlib:char-ascent")
+xCharAttributes		:: LispName ("xlib:char-attributes")
+xCharDescent		:: LispName ("xlib:char-descent")
+xCharLeftBearing	:: LispName ("xlib:char-left-bearing")
+xCharRightBearing	:: LispName ("xlib:char-right-bearing")
+xCharWidth		:: LispName ("xlib:char-width")
+
+-- querying text size
+
+xTextWidth		:: LispName ("xlib:text-width")
+
+-- COLORS
+
+-- creating colormaps
+
+xCreateColormap		:: LispName ("xlib:create-colormap")
+xCopyColormapAndFree	:: LispName ("xlib:copy-colormap-and-free")
+xFreeColormap		:: LispName ("xlib:free-colormap")
+
+-- installing colormaps
+
+xInstallColormap	:: LispName ("xlib:install-colormap")
+xInstalledColormaps	:: LispName ("xlib:installed-colormaps")
+xUnInstallColormap	:: LispName ("xlib:uninstall-colormap")
+
+-- allocating colors
+
+xAllocColor		:: LispName ("x-alloc-color")
+xAllocColorCells	:: LispName ("x-alloc-color-cells")
+xAllocColorPlanes	:: LispName ("x-alloc-color-planes")
+
+xFreeColors		:: LispName ("xlib:free-colors")
+
+-- finding colors
+
+xLookupColor		:: LispName ("x-lookup-color")
+xQueryColors		:: LispName ("xlib:query-colors")
+
+-- changing colors
+
+xStoreColor		:: LispName ("xlib:store-color")
+xStoreColors		:: LispName ("x-store-colors")
+
+-- colormap attributes
+
+xColormapDisplay	:: LispName ("xlib:colormap-display")
+xColormapEqual		:: LispName ("xlib:colormap-equal")
+
+-- CURSORS
+
+xCreateCursor		:: LispName ("x-create-cursor")
+xCreateGlyphCursor	:: LispName ("x-create-glyph-cursor")
+xFreeCursor		:: LispName ("xlib:free-cursor")
+
+xQueryBestCursor	:: LispName ("x-query-best-cursor")
+xRecolorCursor		:: LispName ("xlib:recolor-cursor")
+
+xCursorDisplay		:: LispName ("xlib:cursor-display")
+xCursorEqual		:: LispName ("xlib:cursor-equal")
+
+-- ATOMS, PROPERTIES, AND SELECTIONS
+
+-- atoms
+
+xAtomName		:: LispName ("xlib:atom-name")
+xFindAtom		:: LispName ("xlib:find-atom")
+xInternAtom		:: LispName ("xlib:intern-atom")
+
+-- properties
+
+xChangeProperty		:: LispName ("x-change-property")
+xDeleteProperty		:: LispName ("xlib:delete-property")
+xGetProperty		:: LispName ("x-get-property")
+xListProperties		:: LispName ("xlib:list-properties")
+xRotateProperties	:: LispName ("xlib:rotate-properties")
+
+-- selections
+
+xConvertSelection	:: LispName ("x-convert-selection")
+xSelectionOwner		:: LispName ("xlib:selection-owner")
+xSetSelectionOwner	:: LispName ("x-set-selection-owner")
+
+-- EVENT
+
+-- Wait for the next event 
+
+xGetEvent		:: LispName ("x-get-event")
+
+-- managing the event queue 
+
+xQueueEvent		:: LispName ("x-queue-event")
+xEventListen		:: LispName ("x-event-listen")
+
+-- sending events 
+
+xSendEvent		:: LispName ("x-send-event")
+
+-- pointer position
+
+xGlobalPointerPosition	:: LispName ("x-global-pointer-position")
+xPointerPosition	:: LispName ("x-pointer-position")
+xMotionEvents		:: LispName ("x-motion-events")
+xWarpPointer		:: LispName ("x-warp-pointer")
+
+-- keyboard input focus
+
+xSetInputFocus		:: LispName ("x-set-input-focus")
+xInputFucus		:: LispName ("x-input-focus")
+
+-- grabbing the pointer
+
+xGrabPointer		:: LispName ("x-grab-pointer")
+xUngrabPointer		:: LispName ("x-ungrab-pointer")
+xChangeActivePointerGrab :: LispName ("x-change-active-pointer-grab")
+
+-- grabbing a button
+
+xGrabButton		:: LispName ("x-grab-button")
+xUngrabButton		:: LispName ("x-ungrab-button")
+
+-- grabbing the keyboard
+
+xGrabKeyboard		:: LispName ("x-grab-keyboard")
+xUngrabkeyboard		:: LispName ("x-ungrab-keyboard")
+
+-- grabbing a key
+
+xGrabKey		:: LispName ("x-grab-key")
+xUngrabKey		:: LispName ("x-ungrab-key")
+
+-- CONTROL FUNCTIONS
+
+-- grabbing the server
+
+xGrabServer		:: LispName ("xlib:grab-server")
+xUngrabServer		:: LispName ("xlib:ungrab-server")
+
+-- pointer control
+
+xSetPointerAcceleration	:: LispName ("x-set-pointer-acceleration")
+xSetPointerThreshold	:: LispName ("x-set-pointer-threshold")
+xPointerAcceleration	:: LispName ("x-pointer-acceleration")
+xPointerThreshold	:: LispName ("x-pointer-threshold")
+xSetPointerMapping	:: LispName ("x-set-pointer-mapping")
+xPointerMapping		:: LispName ("xlib:pointer-mapping")
+
+-- keyboard control
+
+xBell			:: LispName ("xlib:bell")
+
+xSetKeyboardKeyClickPercent 	:: LispName ("x-set-keyboard-key-click-percent")
+xSetKeyboardBellPercent	    	:: LispName ("x-set-keyboard-bell-percent")
+xSetKeyboardBellPitch	    	:: LispName ("x-set-keyboard-bell-pitch")
+xSetKeyboardBellDuration    	:: LispName ("x-set-keyboard-bell-duration")
+xSetKeyboardLed		    	:: LispName ("x-set-keyboard-led")
+xSetKeyboardAutoRepeatMode  	:: LispName ("x-set-keyboard-auto-repeat-mode")
+
+xKeyboardKeyClickPercent	:: LispName ("x-keyboard-key-click-percent")
+xKeyboardBellPercent		:: LispName ("x-keyboard-bell-percent")
+xKeyboardBellPitch		:: LispName ("x-keyboard-bell-pitch")
+xKeyboardBellDuration		:: LispName ("x-keyboard-bell-duration")
+xKeyboardLed			:: LispName ("x-keyboard-led")
+xKeyboardAutoRepeatMode		:: LispName ("x-keyboard-auto-repeat-mode")
+
+xModifierMapping		:: LispName ("x-modifier-mapping")
+xSetModifierMapping		:: LispName ("x-set-modifier-mapping")
+xQueryKeymap			:: LispName ("xlib:query-keymap")
+
+-- keyboard mapping
+
+xChangeKeyboardMapping 		:: LispName ("xlib:change-keyboard-mapping")
+xKeyboardMapping		:: LispName ("xlib:keyboard-mapping")
+
+xKeycodeKeysym			:: LispName ("xlib:keycode->keysym")
+xKeysymCharacter		:: LispName ("x-keysym-character")
+xKeycodeCharacter		:: LispName ("x-keycode-character")
+
+-- client termination
+
+xAddToSaveSet		:: LispName ("xlib:add-to-save-set")
+xCloseDownMode		:: LispName ("xlib:close-down-mode")
+xSetCloseDownMode	:: LispName ("x-set-close-down-mode")
+xKillClient		:: LispName ("xlib:kill-client")
+xKillTemporaryClients	:: LispName ("xlib:kill-temporary-clients")
+xRemoveFromSaveSet	:: LispName ("xlib:remove-from-save-set")
+
+-- managing host access
+
+xAccessControl		:: LispName ("xlib:access-control")
+xSetAccessControl	:: LispName ("x-set-access-control")
+xAccessHosts		:: LispName ("xlib:access-hosts")
+xAddAccessHost		:: LispName ("xlib:add-access-host")
+xRemoveAccessHost	:: LispName ("xlib:remove-access-host")
+
+-- screen saver
+
+xActivateScreenSaver	:: LispName ("xlib:activate-screen-saver")
+xResetScreenSaver	:: LispName ("xlib:reset-screen-saver")
+xScreenSaver		:: LispName ("x-screen-saver")
+xSetScreenSaver		:: LispName ("x-set-screen-saver")
+
+#-}
+
+data XMArray a
+
+xMArrayCreate     :: [a] -> IO (XMArray a)
+xMArrayLookup     :: XMArray a -> Int -> IO a
+xMArrayUpdate     :: XMArray a -> Int -> a -> IO ()
+xMArrayLength     :: XMArray a -> Int
+
+{-#
+xMArrayCreate     :: LispName("x-mutable-array-create")
+xMArrayLookup     :: LispName("x-mutable-array-lookup")
+xMArrayUpdate     :: LispName("x-mutable-array-update")
+xMArrayLength     :: LispName("x-mutable-array-length")
+#-}
+
+
+xprint			:: a -> IO ()
+{-#
+xprint			:: LispName ("x-print")
+#-}
+
+-- decoded time format:
+-- ([second, minute, hour, date, month, year, day-of-week], 
+--  daylight-saving-time-p)
+-- time format to encode:
+-- [second, minute, hour, date, month, year]
+
+data TimeZone	= WestOfGMT Int {-# STRICT #-}
+		| CurrentZone
+
+getTime		:: IO Integer
+getTimeZone	:: IO Int
+decodeTime	:: Integer -> TimeZone -> ([Int], Bool)
+encodeTime	:: [Int] -> TimeZone -> Integer
+getRunTime	:: IO Float
+getElapsedTime	:: IO Float
+sleep		:: Int -> IO ()
+
+{-#
+ImportLispType (TimeZone (WestOfGMT ("number?", "identity", "identity")))
+ImportLispType (TimeZone (CurrentZone ("null?", "'()")))
+
+getTime		:: LispName("lisp:get-universal-time")
+getTimeZone	:: LispName("get-time-zone")
+decodeTime	:: LispName("decode-time")
+encodeTime	:: LispName("encode-time")
+getRunTime	:: LispName("get-run-time")
+getElapsedTime	:: LispName("get-elapsed-time")
+sleep		:: LispName("lisp:sleep")
+
+#-}
+
+xWmName 		:: XWindow -> IO String
+xSetWmName		:: XWindow -> String -> IO ()
+
+xWmIconName		:: XWindow -> IO String
+xSetWmIconName		:: XWindow -> String -> IO ()
+
+{-#
+xWmName 		:: LispName ("xlib:wm-name")
+xSetWmName		:: LispName ("x-set-wm-name")
+
+xWmIconName		:: LispName ("xlib:wm-icon-name")
+xSetWmIconName		:: LispName ("x-set-wm-icon-name")
+#-}

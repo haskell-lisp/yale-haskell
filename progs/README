@@ -1,0 +1,9 @@
+This directory contains Haskell source code.
+Subdirectories:
+prelude               The prelude used in this system
+tutorial              The online supplement to the Hudak & Fasel tutorial
+demo                  A set of random demo programs
+lib                   Various random extensions
+
+Other programs can be found in the Haskell program library on the
+official Haskell ftp sites.

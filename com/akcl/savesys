@@ -1,0 +1,46 @@
+#!/bin/csh
+#
+# savesys -- build a saved executable in bin/new-cmu-haskell.core
+#
+#
+cd $Y2
+setenv PRELUDEBIN $Y2/progs/prelude/akcl
+if !(-e $PRELUDEBIN/Prelude.o) then
+  echo "Build the prelude first, stupid..."
+  exit
+  endif
+$AKCL <<EOF
+;;; Load the Haskell system.
+(make-package "MUMBLE-IMPLEMENTATION" :use '("LISP"))
+(load "cl-support/cl-init.lisp")
+;;; Set various internal switches to appropriate values for running
+;;; Haskell code.
+(proclaim '(optimize (speed 3) (safety 0) (compilation-speed 0)))
+(setf *load-verbose* nil)
+(setf compiler:*compile-verbose* nil)
+(in-package :mumble-user)
+(setf *printers* '(compiling loading))
+(setf *optimizers* '())
+(setf *compile-interface* '#f)
+(setf *code-chunk-size* 100)
+;;; Load the prelude.
+(compile/load *prelude-unit-filename*)
+;;; Set up the saved system.
+;;; AKCL doesn't have the new CL condition system, so define the 
+;;; restart function using catch and throw.
+(define (haskell-toplevel)
+  (setf lisp:*package* (lisp:find-package :mumble-user))
+  (setf lisp:*default-pathname-defaults* (lisp:truename "./"))
+  (load-init-files)
+  (do () ('#f)
+    (lisp:catch 'restart-haskell
+      (heval))))
+(define (restart-haskell)
+  (lisp:throw 'restart-haskell '#f))
+;;; Have to do garbage collection and set-up of top-level function
+;;; by hand before calling save.
+;;; AKCL exits automatically after calling save.
+(lisp:gbc 3)
+(setf system::*top-level-hook* (function haskell-toplevel))
+(lisp:save "bin/new-akcl-haskell")
+EOF

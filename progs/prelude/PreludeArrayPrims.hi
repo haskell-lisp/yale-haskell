@@ -1,0 +1,37 @@
+-- These primitives are used to implement arrays with constant time
+-- access.  There are destructive update routines for arrays for use
+-- internally in functions such as array.  These are impure but are
+-- marked as pure to keep them out of the top level monad.  This should
+-- be redone using lambda-var someday.
+
+interface PreludeBltinArray where
+
+
+data Vector a    -- Used to represent vectors with delayed components
+data Delay a     -- An explicit represenation of a delayed object
+
+
+-- Primitive vectors now always have strict components.  This permits us
+-- to treat array indexing as an atomic operation without the explicit
+-- force on access.
+
+primVectorSel :: Vector a -> Int -> a
+primVectorUpdate :: Vector a -> Int -> a -> a
+primMakeVector :: Int -> a -> Vector a
+primCopyVector :: Vector a -> Vector a
+
+-- These functions are used for explicit sequencing of destructive ops
+
+strict1 :: a -> b -> b
+primForce :: Delay a -> a
+
+{-#
+primVectorSel ::  LispName("prim.vector-sel"), Complexity(1)
+primVectorUpdate :: LispName("prim.vector-update"), Complexity(1)
+primMakeVector :: LispName("prim.make-vector"), Complexity(4)
+primCopyVector :: LispName("prim.copy-vector"), Complexity(5)
+strict1 :: Strictness("S,N"),
+	   LispName("prim.strict1")
+primForce :: LispName("prim.force")
+#-}
+

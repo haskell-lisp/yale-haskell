@@ -1,0 +1,14 @@
+#!/bin/csh
+#
+# build-xlib -- recompile the xlib stuff
+#
+# note that allegro's loader will look in its lib directory automagically
+# for the clx library
+cd $Y2
+setenv LIBRARYBIN $Y2/progs/lib/X11/$ALLEGRODIR
+rm $LIBRARYBIN/xlib*.sbin
+bin/allegro-haskell <<EOF
+:(lisp:load "clx")
+:(setf *code-quality* 3)
+:compile \$HASKELL_LIBRARY/X11/xlib
+EOF

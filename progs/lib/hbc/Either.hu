@@ -1,0 +1,3 @@
+:output $LIBRARYBIN/
+:o= all
+Either.hs

@@ -1,0 +1,7 @@
+interface Misc where
+
+random :: Int -> IO Int
+
+{-#
+random :: LispName("lisp:random")
+#-}

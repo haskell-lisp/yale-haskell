@@ -1,0 +1,15 @@
+#!/bin/csh
+#
+# build-xlib -- recompile the xlib stuff
+#
+#
+cd $Y2
+setenv CLXFILE /cs/licensed/sclisp-4.0/windows-x.sbin
+setenv LIBRARYBIN $Y2/progs/lib/bin/lucid
+rm $LIBRARYBIN/xlib*.sbin
+bin/haskell <<EOF
+:(lcl:change-memory-management :expand 512)
+:(load "\$CLXFILE")
+:(setf *code-quality* 3)
+:compile \$HASKELL_LIBRARY/X11/xlib
+EOF

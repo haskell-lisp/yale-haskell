@@ -1,0 +1,5 @@
+:output $LIBRARYBIN/
+:o= all
+logop.hs
+logop-prims.scm
+logop-prims.hi

@@ -1,0 +1,578 @@
+
+%  This is obsolete regarding the X system  -- jcp
+
+% -*-latex-*-
+% Creator: John Tinmouth
+% Creation Date: Thu May 9 1991
+\documentstyle[11pt]{article}
+\newcommand{\X}[1]{{#1}\index{{#1}}}
+\begin{document}
+
+\title{A Functional Animation Package in Haskell}
+\author{
+        John Tinmouth\\
+        Computer Science Senior Project\\
+         Yale University\\
+         Professor Paul Hudak }
+\date{9 May 1991}
+\maketitle
+
+
+
+\section{Introduction}
+
+  	In his paper "A Functional Animation Starter Kit" [ARYA88], Kevi Arya 
+proposes an approach to animation that uses functional languages. As
+Arya describes, the cost of computing power is falling. This is making
+the use of computer animation much more prevalent. However, languages
+such as C make it difficult to program animations. What is needed is
+a simpler, faster and more accessible way to program graphics. Functional
+languages are a very effective means for this, due to their higher order
+functions.
+ 
+	Kevi Arya goes on to provide such a functional animation package in
+the language Miranda. Haskell in particular is good functional language for
+two reasons. It is a completely functional language, doing even I/O in a 
+functional manner. Variables are evaluated in a lazy manner allowing infinite 
+lists to be manipulated easily, which suits the infinite frames format
+of animation. As it is now possible to complete the implementation of
+this package is Haskell, my work has been converting these Miranda programs
+to Haskell version 1.0-0, Yale Haskell Group. 
+
+
+  
+\section{How to Use the Graphics:  Overview}
+
+  By using higher order functions, it becomes very easy to do rapid 
+prototyping of animations. You can quickly throw out an animation of
+simple images manipulated in simple ways. For example, if there was
+an image of a car, and you wanted it to move left, you could almost 
+just describe it in english, and that would be the animation.
+\begin{verbatim}
+     movie = apply left car
+\end{verbatim}
+
+	After the simple model is done, converting it to a more complex model
+is simple. Simply make the image, "car" in this case, more complex, and
+then modify the "left" function, and you are done.
+
+	There are three stages in making a movie. First of all, you must
+define your basic images. These will tend to be Pics put into lists, either
+finite or infinite, to be basic Movies. Second, you decide precisely
+what kind of motion you want in animation. These are behaviours. A behaviour
+modifies a movie over time, changing each successive frame. This includes
+motion, changing size, changing from one image to another and so forth. These 
+are applied to your basic Movies. Third, you must combine your basic Movies
+into your final Movie. If you want a scene of clouds and a man walking, you
+must overlay your basic Movie of clouds with your Movie of a walking man.
+
+\section {Original Images or Pics}
+
+	A Movie is a list of frames called Pics. Each of these Pics is a list 
+of colored polygons. The Pic is a Color followed by a list of Vectors, 
+representing the vertices of the Polygon. The original Pic usually must
+be entered by hand, although simple generation routines for boxes, 
+triangles and circles are available. You need to produce some of these
+basic images in one way or another, so that you have something to 
+manipulate.
+
+	To make a Movie, you need a list of these Pics. With a single Pic, you
+can generate a sequence of that Pic. With several Pics, you can oscillate
+through the Pics in an inifinite list. To generate an infinite list of
+Pics of p1, define a Movie, m1 = i p1. 
+  The following datatypes are used in this package:
+
+\begin{verbatim}
+type Vec	= (Int,Int)
+type Color	= Int
+type Poly	= (Color,[Vec])
+type Pic 	= [Poly]
+type Movie	= [Pic]
+type Behaviour	= [Pic -> Pic]
+\end{verbatim}
+
+
+\subsection {Modifying Pics}
+
+  Starting with a single Pic, it is possible to create a short list of
+Pics to oscillate on. You can flip it, scale it, or otherwise modify the
+original Pic (p1) in some way to create another Pic (p2). You can either
+keep doing this and produce N images for a Movie of [p1,p2,...,pN], or use
+the interpolation functions available to shift from p1 to p2 in N frames,
+resulting in a Movie [p1,interp1,interp2,...,interpN-2,p2].
+  The list of specific Pic-to-Pic functions is included in the next section,
+along with short explanations of what they do.
+
+\subsection {Pic-to-Pic Functions Available}
+
+\begin{verbatim}
+overlay_Pic     Args: Pic Pic 
+                This takes 2 Pics and just puts them together into one Pic.
+                module: R_Picture
+
+put_Pic	        Args: Vec Pic Pic
+                This overlays the two Pics, putting Pic-1's center the Vec 
+                distance away from Pic-2's center.
+                module: R_Picture
+
+over_Pic        Args: Pic Pic
+                This puts two images on top of one another, explicitly 
+                centering the first on top of the second and forms one Pic.
+                module: R_Picture
+                
+above_Pic       Args: Pic Pic
+                This puts the first Pic above the second Pic, at a distance
+                of half the combined heights of the Pics and overlays them
+                to form one Pic.
+                module: R_Picture
+
+beside_Pic      Args: Pic Pic
+                This puts the first Pic to the right of the second Pic, at
+                a distance of half the combined widths of the Pics and 
+                overlays them to form one Pic.
+                module: R_Picture
+
+beside2_Pic     Args: Pic Pic
+                Withouth analysing the widths of the Pics, it puts the
+                first Pic the width of the second Pic to the right and
+                overlays them to form one Pic.
+                module: R_Picture
+
+scale_Pic       Args: Int Pic 
+                This scales the picture in elevenths around its own origin
+                and returns that Pic. So if the Int is 22, the Pic will
+                scaled by a factor of 2 (22/11).
+                module: R_Picture
+
+scale_rel_Pic   Args: Vev Int Pic
+                This is another scaling function, but it scales the image
+                from the Vec, treating it as the origin. 
+                module: R_Picture
+
+mov_Pic         Args: Vec Pic
+                This moves the Pic by the amount of the vector.  
+                module: R_Picture
+
+movto_Pic       Args: Vec Pic
+                This moves the Pic's center to the Vec.
+                module: R_Picture
+
+to_orig         Args: Pic
+                This moves the Pic's center to the lower,left side of
+                the Pic. 
+                module: R_Picture
+
+rot_Pic         Args: Vec Float Pic
+                This rotates the Pic by the Float in radians, using the Vec
+                as the origin of rotation.
+                module: R_Picture
+
+twist_Pic       Args: Float Pic
+                This rotates the Pic by the Float amount of radians around
+                its own center. 
+                module: R_Picture
+
+rot_Pic'        Args: Vec Pic
+                This rotates the Pic by a certain amount (set in R_Constants)
+                using the Vec as the center of rotation. The set amount of
+                rotation makes it faster than rot_Pic.
+                module: R_Picture
+
+twist_Pic'      Args: Pic
+                This rotates the Pic by a certain amoutn (set in R_Constants)
+                around the Pic's origin. The set amount of rotation makes
+                it faster than twist_Pic.
+                module: R_Picture
+
+flipx_Pic       Args: Int Pic
+                This flips the Pic around the line x=Int, essentially giving
+                a mirror image of the Pic, reversing right and left.
+                module: R_Picture
+
+
+flipy_Pic       Args: Int Pic
+                This flips the Pic around the line y=Int, mirror-imaging the
+                Pic, reversing up and down.
+                module: R_Picture
+
+flip_Pic        Args: Pic
+                This flips the Pic around its own x-origin, reversing
+                left and right. 
+                module: R_Picture
+
+flock_Pic       Args: Int Pic
+                This takes the image Pic and copies it out Int*Int times in
+                a Int by Int grid pattern, and returns that as an Pic.
+                module: R_Picture
+
+set_Color       Args: Int Pic
+                This takes an Int standing for a color, and changes the
+                color of the Pic to that.
+                module: R_Picture 
+\end{verbatim}
+
+\subsection{Other Functions for Manipulating Pics}
+
+\begin{verbatim}
+i               Args: Any		
+                This will take anything and return an infinite stream of them.
+                module: R_Utility
+
+osc             Args: [Any]
+                This will take a Movie, which is a list of Pics and 
+                oscillate them. 
+                    [p1]           will give [p1,p1,p1,p1....]
+                    [p1,p2,p3,p4]  will give [p1,p2,p3,p4,p3,p2,p1,p2...]
+                module: R_Utility
+\end{verbatim}
+
+\section{Behaviours and their Application to Movies}
+
+	A Behaviour is a list of functions that will convert one Pic to
+another Pic. This list then can be applied to any Movie with one
+of the application functions (most often apply). The beauty of the Behaviour
+is that once you have a behaviour for moving left, you can move any
+Movie left without rewriting the routine every time.
+  
+	There are specific functions that take a Behaviour and a Movie and
+return a new Movie. These are apply and while. If you had a Movie of a
+man walking in place, and a Behaviour called left that moves Pics ever
+increasing distances left, then you could create a man walking left by:
+\begin{verbatim}
+        apply left man
+\end{verbatim}
+
+	If you want to apply more than one Behaviour to a Movie, you must first
+decide whether to do that in sequence or in parallel, and use bSeq and bPar
+to reduce the list of Behaviours to a single Behaviour, and then apply
+that to a movie. For example:
+\begin{verbatim}
+        apply (bPar left up) gull
+\end{verbatim}
+will take a Movie of a gull and move the Pics up and left.
+
+	Most of the basic Behaviours are defined in R\_Behaviour. 
+
+    
+\subsection{Defining Customized Packages of Behaviours}
+
+	Often you will have more specialized, or just simpler Behaviours you
+want to use. Using the Behaviours and Pic-to-Pic functions, it is very
+easy to create your own small library of Behaviours. R\_Defaults is a
+module of such Behaviours. For example, to create a Behaviour to move
+a Movie right, you  would create a list of mov\_Pic's, each taking a
+everincreasingly large x-coordinate.
+\begin{verbatim}
+        right = [ mov_Pic (x,y) | (x,y) <- zip [0,10,..] [0,..] ] 
+\end{verbatim}
+
+	Or if you wanted a behavour to place a Movie at (100,100) twice as
+large as before, you could create a new Behaviour from old ones as:
+    scaleat= bPar [movto (i (100,100)), scale (i 22)]
+
+\subsection{Behaviours Available}
+\begin{verbatim}
+flip            Args: none
+                This will flip every Pic around its x-origin, resulting in
+                mirror images reversing left and right.
+                module: R_Behaviour
+ 		
+twist'          Args: none
+                This will rotate each Pic by the amount rotunit (see 
+                R_Constants) around its origin.
+                module: R_Behaviour
+
+mov             Args: [Vec]
+                This will move each Pic by its corresponding vector.
+                module: R_Behaviour
+
+movto           Args: [Vec]
+                This will move each Pic's origin to its corresponding vector.
+                module: R_Behaviour
+
+circ_mov        Args: Float Float
+                This will move each Pic in a circle, of radius of the first
+                Float and by an increment of the second Float, using (0,0)
+                as the origin of rotation.
+                module: R_Behaviour
+
+scale           Args: [Int]
+                Scales every Pic on its origin by the the corresponding Int
+                in the list. These Ints represents elevenths, so that a 
+                [2,2,...] will scale every Pic by 2/11 .
+                module: R_Behaviour
+
+scale_rel       Args: Vec [Int]	
+                Same as scale, except that the Pics are all scaled using the
+                Vec as the point of origin.
+                module: R_Behaviour
+
+twist           Args: [Float]
+                This will rotate every Pic by its corresponding Float from
+                the list in radians.
+                module: R_Behaviour
+
+set_color       Args: [Int]
+                This sets each Pic to the color indicated by its 
+                corresponding int in the list.
+                module: R_Behaviour
+	
+rot             Args: [Vec] [Float]
+                This will rotate each Pic around its corresponding Vec by
+                its corresponding Float in radians.
+                module: R_Behaviour
+
+big             Args: none
+                Scales every Pic up by scaleunit
+                module: R_Defaults
+
+huge            Args: none
+                This scales every Pic up by 2*scaleunit
+                module: R_Defaults
+
+small           Args: none
+                This scales every Pic down by 10/11
+                module: R_Defaults
+
+tiny            Args: none
+                This scale every Pic down by 5/11
+                module: R_Defaults
+
+bigger          Args: none
+                This scales every Pic in the list by scaleunit more 
+                than the previous Pic, so that the n-th element is
+                scaled up by (n-1)*scaleunit 
+                module: R_Defaults
+
+smaller         Args: none
+                This scales every Pic down, so that the n-th element
+		is scaled down by (n-1)*(10/11)
+                module: R_Defaults
+
+ccw             Args: none
+                This rotates every Pic by one rotunit more than the
+                previous Pic, in a counterclockwise fashion.
+                module: R_Defaults
+
+cw              Args: none
+                This rotates every Pic by one rotunit more than the
+                previous Pic, in a clockwise fashion.
+                module: R_Defaults
+
+up              Args: none
+                This moves every Pic up by one unit more than the 
+                Previous Pic, so that the n-th element is moved up 
+                (n-1) units.
+                module: R_Defaults
+
+down            Args: none
+                This is same as up, but the Pics move down.
+                module: R_Defaults
+
+right           Args: none
+                This is same as up, but the Pics move right.
+                module: R_Defaults
+
+left            Args: none
+                This is same as up, but the Pics move left.
+                module: R_Defaults
+\end{verbatim}
+
+\subsection{Functions For Behaviours}
+
+\begin{verbatim}
+do              Args: Int Behaviour
+                This takes the first Int elements of the Behaviour and
+                return that.
+                module: R_Behaviour
+
+rpt             Args: Int Behaviour
+                This takes an Int and returns a Behaviour of length Int.
+                However, the n-th Pic-to-Pic in the Behaviour returned
+                is made up of the first through (n-1)the Pic-to-Pics of
+                the input list.
+                module: R_Behaviour
+
+forever         Args: Behaviour
+                This makes a finite Behaviour list an infinite one by
+                appending the list to itself endlessly.
+                module: R_Behaviour
+
+apply           Args: Behaviour Movie
+                This takes a Behaviour and applies it to a Movie
+                module: R_Behaviour
+
+while           Args: (Boolean function) Behaviour Movie
+                As long as the Boolean function evaluates true, this 
+                takes a Behaviour and applies it to a Movie. When it
+                evaluates to false, no more Pics are produced and
+                the Movie is cut short there.
+                module: R_Behaviour
+
+bseq            Args: Behaviour Behaviour
+                This takes two Behaviour and creates one Behaviour made
+                up of the two inputs applies in sequence.
+                module: R_Behaviour
+
+bSeq            Args: [Behaviour] Behaviour
+                This takes two Behaviour and creates one Behaviour made
+                up of the two inputs applies in sequence.
+                module: R_Behaviour
+
+bpar            Args: Behaviour Behaviour
+                This takes two Behaviour and creates one Behaviour made
+                up of the two inputs applies in parallel.
+                module: R_Behaviour
+
+bPar            Args: [Behaviour] Behaviour
+                This takes two Behaviour and creates one Behaviour made
+                up of the two inputs applies in parallel.
+                module: R_Behaviour
+\end{verbatim}
+
+\section{Creating the Final Movie}
+
+	Finally, you have your basic Movies made up of Pictures and Behaviours.
+Now you need to combine them into one Movie. The functions that do this
+are found in the module R\_Movie. These functions will take a list of
+Movies and return a single Movie combining all the Movies in the list.
+How they are combined can be controlled to some extent. Usually they are
+just overlayed, but they can be put beside one another, or on top of
+one another, or put a Vec distance apart.
+
+	It is also possible to use a combination of these forms. If you wanted
+to overaly M1 and M2, and then put that beside M3, you would do:
+\begin{verbatim}
+        rBESIDE [M3, rOVERLAY [M1,M2] ]
+\end{verbatim}
+This is acceptable as rOVERLAY will return a single Movie. 
+
+\subsection{Movie Combining Functions}
+
+\begin{verbatim}
+rABOVE          Args: [Movie]
+                Puts all the Movies into one movie, all above one another.
+                module: R_Movie
+
+rBESIDE         Args: [Movie]
+                Puts all the Movies into one movie, all beside one another.
+                module: R_Movie
+
+rBESIDE2        Args: [Movie]
+                Using their absolute coordinates, puts all the Movies
+                beside one another.
+                module: R_Movie
+
+rOVER           Args: [Movie]
+                This lays the Movies on top of one another, centering 
+                each Pic so that they share the same origin.
+                module: R_Movie
+
+rOVERLAY        Args: [Movie]
+                This lays the Movies on top of one another, centering
+                each Pic so that they share the smae origin.
+                module: R_Movie
+
+pUT             Args: [Vec] Movie Movie
+                This takes a list of Vec, and puts each Pic of the
+                first Movie in the location of the corresponding
+                Vec on top of the Pic of the second Movie and
+                returns that list as the new Movie.
+                module: R_Movie
+
+\end{verbatim}
+
+\section{Displaying Your Movie}
+
+	Once you have your function for the Movie defined, you need to output
+it in some way. Currently, this is done by outputting characters to a file and
+running a C Program in X-Windows that displays the contents of the file
+as a graphic in the X system. First of all, you must convert the
+Movie variable to a stream of characters. This is done by running 
+"showm" on the Movie. Be carefull you don't try to convert an infinite list
+into characters as the compiler will take awhile to do this. Instead, take
+a certain number of frames and convert them with "showm".
+\begin{verbatim}
+        man\_vm = rOVERLAY [man,vm]
+        man\_vmstring = showm (take 20 man&vm)
+\end{verbatim}
+  Now that you have this string, you need to write it to disk. The 
+"writetofile" function does this. It takes a characater string(ie [Char] )
+as an argument, and then prompts you for a filename. It then writes the
+string to the filename. So to put man\_vm string into a file:
+\begin{verbatim}
+        main = writetofile man_vmstring
+\end{verbatim}
+and run the program, where you will prompted for the filename. Or you could:
+\begin{verbatim}
+        main = writetofile (showm (take 20 man_vm))
+\end{verbatim}
+to make it more compact.
+
+
+\subsection{Miscellaneous Usefull Functions}
+
+\begin{verbatim}
+inbetween       Args: Int Pic Pic
+                This takes an Int and two Pics and returns a Movie 
+                with Int Pics interpolating between the two Pics.
+                module: R_Inbetween
+
+tween           Args: Int Movie Movie
+                This takes an Int and two Movies and returns one
+                Movie made up of the first Movie, Int number of
+                frames of Pics interpolating between the last
+                Pic of the first Movie and the first Pic of the
+                second Movie, followed by the second Movie
+                module: R_Inbetween
+
+box             Args: Int Int Int
+                This takes 3 Ints, the color, width and height of 
+                the box and returns a Pic of a box
+                module: R_Shapes
+
+tri             Args: Int Vec Vec Vec
+                This takes a color and three vectors and returns a
+                Pic of a triangle of that colour with those vertices.
+                module: R_Shapes
+
+circ            Args: Int Int Int
+                This takes a color, the radius and the number of points
+                around the circle, and returns a circle with origin at
+                (0,0).
+                module: R_Shapes
+\end{verbatim}
+
+\pagebreak
+\large {\bf Appendix:  C Programs to Display on X-Windows}
+\\
+\\
+	The program currently used to run these graphics is called "xcshow".
+This takes one argument, the name of the file to be run. When run
+in X-Windows, it will produce a window with the first Pic. To run it, click
+on the left mouse button inside the window. Clicking again will freeze it.
+This will keep cycling through the file, replaying again when it hits the
+end of the file, until the window is killed.
+
+	There is also "xshow" which is used to run the monochrome Movies, as
+"xcshow" is used to run the color Movies. As this animation package
+only produces color Movies, it isn't too usefull.
+
+
+\pagebreak
+\large {\bf References}
+\\
+\\
+\begin{verbatim}
+[ARYA88] "The Formal Analysis of a Functiona Animation System", Kevi Arya,
+          DPhil,Thesis,Oxford University, Programming Research Group,
+          April 1988
+
+[ARYA89] "Processes In A Functional Animation System", Kevi Arya,IBM
+          T.J. Research Center, 1989 
+
+[HASK90] "Report On The Programming Language Haskell, Version 1.0",
+          YALEU/DCS/RR-777,Yale University,1990
+\end{verbatim}
+
+\end{document}

@@ -1,0 +1,5 @@
+#!/bin/csh
+#
+# delete lucid binaries
+'rm' $Y2/*/lucid/*.{sbin,rbin}
+

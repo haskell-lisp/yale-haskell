@@ -1,0 +1,69 @@
+#!/bin/csh
+#
+# Set up for Yale Haskell 2.x development
+#
+
+source $HASKELL/haskell-setup
+
+
+# You need to set this environment variable to point to the root
+# directory where you have installed the Yale Haskell sources.
+
+setenv Y2 $HASKELL
+
+
+# Define some aliases for getting the right RCS options.
+# These aliases are only for use at Yale.
+
+alias rco 'co -l'
+alias rci 'ci -u'
+
+
+# Find the "right" lisp executable.
+# You really only need to set up for the particular lisp implementation(s)
+# you are going to build the system under (you can comment out the rest).
+
+# The Lucid CL executable we've been using is the one without fancy
+# stuff like CLOS loaded.
+
+setenv LUCID /cs/licensed/sclisp-4.0/lisp-4-0-base
+
+
+# Setup for CMUCL.  We have this aliased to a script that will select
+# the right core file for the machine you are running on.
+
+setenv CMUCL $Y2/bin/run-cmucl
+setenv CMUCLBIN $Y2/bin/cmucl
+setenv CMUCLLIB $Y2/bin
+
+
+# This is AKCL, not ordinary KCL (which is too brain-damaged).
+
+setenv AKCL /net/nebula/homes/systems/hcompile/akcl/xbin/kcl
+
+
+# Set up for Franz Allegro.
+# This is a hack; we run Allegro on both sparc and next boxes, and
+# we need to be able to tell which kind of machine we're running on so 
+# the binaries don't get jumbled up together.
+
+if (-e /vmunix) then
+  setenv ALLEGRODIR allegro
+  setenv ALLEGRO /usr/licensed/allegro/cl
+else if (-e /mach) then
+  setenv ALLEGRODIR allegro-next
+  setenv ALLEGRO /usr/local/bin/lisp
+else
+  echo "Can't figure out what kind of machine you're on!"
+endif
+
+
+# Set up for Harlequin Lispworks.
+
+setenv LISPWORKS /usr/licensed/bin/lispworks
+
+
+# Set up for WCL
+# This is not supported!
+# setenv WCL /net/nebula/homes/systems/hcompile/wcl-2.14/bin/wcl
+# setenv LD_LIBRARY_PATH /net/nebula/homes/systems/hcompile/wcl-2.14/lib

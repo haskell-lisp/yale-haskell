@@ -1,0 +1,4 @@
+:output $LIBRARYBIN/
+:o= all
+Miranda.hs
+QSort.hu

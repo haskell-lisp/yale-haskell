@@ -1,0 +1,48 @@
+
+-- This is the interface to the primitives used to implement arbitrary
+-- sized tuples.
+
+interface PreludeTuplePrims where
+
+{-# Prelude #-}
+
+-- The type checker fiddles around with the call to dictSel to use the
+-- dictionary to resolve the overloading of a subexpression.  The call
+-- dictSel (exp dict i) will typecheck exp and use the ith component of
+-- the tupleDict dict to resolve the overloading.  No check is made to ensure
+-- that the type of the dictionary matches the overloaded class!  Beware!
+
+import PreludeData(Int)
+
+data Tuple
+data TupleDicts
+
+
+tupleSize :: TupleDicts -> Int
+tupleSel :: Tuple -> Int -> Int -> a
+dictSel :: TupleDicts -> Int -> a
+listToTuple :: [a] -> Tuple
+-- These are not called by haskell code directly; these are introduced
+-- during dictionary conversion by the type checker.
+tupleEqDict :: a
+tupleOrdDict :: a
+tupleIxDict :: a
+tupleTextDict :: a
+tupleBinaryDict :: a
+
+{-#
+tupleSize ::       LispName("prim.tupleSize"), Complexity(1)
+tupleSel ::        LispName("prim.tupleSel")
+dictSel ::         LispName("prim.dict-sel")
+listToTuple ::     LispName("prim.list->tuple"), NoConversion
+tupleEqDict ::     LispName("prim.tupleEqDict")
+tupleOrdDict ::    LispName("prim.tupleOrdDict")
+tupleIxDict ::     LispName("prim.tupleIxDict")
+tupleTextDict ::   LispName("prim.tupleTextDict")
+tupleBinaryDict :: LispName("prim.tupleBinaryDict")
+
+#-}
+
+
+
+

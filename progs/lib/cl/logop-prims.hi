@@ -1,0 +1,78 @@
+-- logop-prims.hi -- interface to logical operations on numbers
+--
+-- author :  Sandra Loosemore
+-- date   :  19 June 1993
+--
+
+interface LogOpPrims where
+
+logiorInteger		:: Integer -> Integer -> Integer
+logxorInteger		:: Integer -> Integer -> Integer
+logandInteger		:: Integer -> Integer -> Integer
+logeqvInteger		:: Integer -> Integer -> Integer
+lognandInteger		:: Integer -> Integer -> Integer
+lognorInteger		:: Integer -> Integer -> Integer
+logandc1Integer		:: Integer -> Integer -> Integer
+logandc2Integer		:: Integer -> Integer -> Integer
+logorc1Integer		:: Integer -> Integer -> Integer
+logorc2Integer		:: Integer -> Integer -> Integer
+lognotInteger		:: Integer -> Integer
+logtestInteger		:: Integer -> Integer -> Integer
+logbitpInteger		:: Int -> Integer -> Integer
+ashInteger		:: Integer -> Int -> Integer
+logcountInteger		:: Integer -> Int
+integerLengthInteger	:: Integer -> Int
+
+logiorInt		:: Int -> Int -> Int
+logxorInt		:: Int -> Int -> Int
+logandInt		:: Int -> Int -> Int
+logeqvInt		:: Int -> Int -> Int
+lognandInt		:: Int -> Int -> Int
+lognorInt		:: Int -> Int -> Int
+logandc1Int		:: Int -> Int -> Int
+logandc2Int		:: Int -> Int -> Int
+logorc1Int		:: Int -> Int -> Int
+logorc2Int		:: Int -> Int -> Int
+lognotInt		:: Int -> Int
+logtestInt		:: Int -> Int -> Int
+logbitpInt		:: Int -> Int -> Int
+ashInt			:: Int -> Int -> Int
+logcountInt		:: Int -> Int
+integerLengthInt	:: Int -> Int
+
+{-#
+logiorInteger		:: LispName("logop.logior-integer"), Complexity(4)
+logxorInteger		:: LispName("logop.logxor-integer"), Complexity(4)
+logandInteger		:: LispName("logop.logand-integer"), Complexity(4)
+logeqvInteger		:: LispName("logop.logeqv-integer"), Complexity(4)
+lognandInteger		:: LispName("logop.lognand-integer"), Complexity(4)
+lognorInteger		:: LispName("logop.lognor-integer"), Complexity(4)
+logandc1Integer		:: LispName("logop.logandc1-integer"), Complexity(4)
+logandc2Integer		:: LispName("logop.logandc2-integer"), Complexity(4)
+logorc1Integer		:: LispName("logop.logorc1-integer"), Complexity(4)
+logorc2Integer		:: LispName("logop.logorc2-integer"), Complexity(4)
+lognotInteger		:: LispName("logop.lognot-integer"), Complexity(4)
+logtestInteger		:: LispName("logop.logtest-integer"), Complexity(4)
+logbitpInteger		:: LispName("logop.logbitp-integer"), Complexity(4)
+ashInteger		:: LispName("logop.ash-integer"), Complexity(4)
+logcountInteger		:: LispName("logop.logcount-integer"), Complexity(4)
+integerLengthInteger	:: LispName("logop.integer-length-integer"), Complexity(4)
+
+logiorInt		:: LispName("logop.logior-int"), Complexity(2)
+logxorInt		:: LispName("logop.logxor-int"), Complexity(2)
+logandInt		:: LispName("logop.logand-int"), Complexity(2)
+logeqvInt		:: LispName("logop.logeqv-int"), Complexity(2)
+lognandInt		:: LispName("logop.lognand-int"), Complexity(2)
+lognorInt		:: LispName("logop.lognor-int"), Complexity(2)
+logandc1Int		:: LispName("logop.logandc1-int"), Complexity(2)
+logandc2Int		:: LispName("logop.logandc2-int"), Complexity(2)
+logorc1Int		:: LispName("logop.logorc1-int"), Complexity(2)
+logorc2Int		:: LispName("logop.logorc2-int"), Complexity(2)
+lognotInt		:: LispName("logop.lognot-int"), Complexity(2)
+logtestInt		:: LispName("logop.logtest-int"), Complexity(2)
+logbitpInt		:: LispName("logop.logbitp-int"), Complexity(2)
+ashInt			:: LispName("logop.ash-int"), Complexity(2)
+logcountInt		:: LispName("logop.logcount-int"), Complexity(2)
+integerLengthInt	:: LispName("logop.integer-length-int"), Complexity(2)
+#-}
+

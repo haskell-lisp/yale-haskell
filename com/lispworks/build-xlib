@@ -1,0 +1,12 @@
+#!/bin/csh
+#
+# build-xlib -- recompile the xlib stuff
+#
+# note that lispworks comes with clx pre-loaded!
+cd $Y2
+setenv LIBRARYBIN $Y2/progs/lib/X11/lispworks
+rm $LIBRARYBIN/xlib*.wfasl
+bin/lispworks-haskell <<EOF
+:(setf *code-quality* 3)
+:compile \$HASKELL_LIBRARY/X11/xlib
+EOF

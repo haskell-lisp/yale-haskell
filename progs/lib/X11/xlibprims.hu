@@ -1,0 +1,5 @@
+:output $LIBRARYBIN/
+:stable
+:o= all
+xlibclx.scm
+xlibprims.hi

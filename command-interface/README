@@ -1,0 +1,2 @@
+This directory contains code to implement the command interface and
+incremental compiler.  See the doc directory for details.

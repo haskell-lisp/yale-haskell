@@ -1,0 +1,105 @@
+Here are the steps involved in porting to a new Common Lisp implementation.
+
+(0) Find the executable you want to use.  If possible, use an image
+    that doesn't have stuff like CLX, CLOS, a snazzy editor, and the
+    like loaded, since we don't use any of that stuff.
+
+    Put an environment variable in the haskell-development script to point 
+    to the lisp you want to run.
+
+(1) You must add appropriate conditionalizations to cl-init.lisp and 
+    cl-definitions.lisp in this directory.  Look for places where there
+    are #+ things for the other dialects.
+
+    As a matter of style, try to make an explicit case for each Lisp
+    instead of using #- to test for it *not* being a particular dialect.
+    This will prevent confusion on future ports.
+
+    You may also need/want to add conditionals to the primitive 
+    implementation files in the runtime directory.
+
+    Do not add #+/#- conditionalizations to any other random .scm
+    files, since we want to keep this implementation-dependent stuff 
+    centralized.
+
+(2) Make subdirectories to hold compiled files in each of the source
+    directories.  The name of the subdirectory must match the constant
+    lisp-implementation-name in cl-definitions.lisp.
+
+(3) Try compiling the Haskell system (by loading cl-init.lisp) and
+    fix any compilation warnings that happen.  (Hopefully there won't
+    be any.)
+
+    You probably want to build a system initially with the default
+    compiler settings and verbose compiler diagnostics.  This will make 
+    any problems that show up later easier to debug.  Also, it is
+    helpful to capture all the messages in a dribble file to make it
+    easier to verify that everything went OK.
+
+(4) Try compiling the prelude using (compile/prelude *prelude-unit*).
+    You need to create a subdirectory in the progs/prelude directory
+    to hold the output files, and define $PRELUDEBIN to point at
+    this directory (see the haskell-setup script).
+
+    The important thing at this point is that the prelude makes it all 
+    the way through the codegen phase and produces Lisp code.  Don't worry
+    too much now if the Lisp compiler has trouble digesting the output.
+
+    Once you get to this stage, it's time to start messing with
+    compiler optimize proclamations.  We generally use (speed 3) and
+    (safety 0).  Also, you should figure out how to suppress any
+    compiler messages (e.g., set *compile-print* and *compile-verbose*
+    to false).  We usually leave *compile-verbose* on during compilation
+    of the Haskell compiler, but turn it off later so that people don't
+    get messages from the Lisp compiler when running Haskell programs.
+
+(5) Make a subdirectory in the com directory and make the following set 
+    of scripts there:
+
+    clean -- remove all binary files.  Also change the main com/clean
+      script to invoke this.
+    compile -- recompile everything with the right compiler flags (see 
+      step 5).
+    build-prelude -- run the prelude through the haskell compiler.
+      This should save the old compiled prelude files as old-prelude.*
+      case something goes wrong.
+    savesys -- load the compiled prelude and save a core file.
+      This should also be careful not to overwrite an existing file.
+
+    Look at the scripts that have already been written for other Lisps
+    for hints.
+
+    At some point you also need to put a README file in this directory.
+
+
+(6) Now it's time to get serious about getting the prelude to compile.
+    Use the clean, compile, and build-prelude scripts you just wrote.
+
+    Some compilers have a hard time dealing with the large pieces of
+    Lisp code produced for the prelude.  You will probably need to do 
+    something to make the heap bigger.  (And, make sure the machine
+    you are using to do the build on has plenty of swap space.)  You 
+    may also need to tweak the chunk-size parameters to force the 
+    output to be split up into smaller pieces.
+
+    It's OK to leave the prelude interface file as a source file, or
+    to compile it with low speed optimizations.  On the other hand,
+    the prelude code file ought to be processed with as many speed
+    optimizations as possible.
+
+(7) Build a new executable using the "savesys" script and take it for
+    a test drive.
+
+(8) You must also hack the emacs interface file, emacs-tools/haskell.el,
+    to recognize when it's gotten into the debugger or break loop.
+    To test your new executable with the emacs stuff, you must
+    define the environment variable HASKELLPROG to point at it, or
+    set the emacs variable haskell-program-name.
+
+(9) If you want to use the Haskell->CLX interface, you'll have to
+    mess with equivalents of the build-xlib and savesys-xlib scripts.
+    There is some system-dependent code in xlibclx.scm to set up an
+    error handler -- make sure you have conditionalized this appropriately
+    for your Lisp system.
+
+

@@ -1,0 +1,4 @@
+:o= all
+$HASKELL_LIBRARY/X11/xlib.hu
+weights.hs
+utilities.hs
